@@ -3,6 +3,7 @@ import {
   cellKey,
   commandToText,
   getDisplayScore,
+  type CommandType,
   type Direction,
   type GameState,
   type Tank,
@@ -43,6 +44,45 @@ const SUMMARY_ICONS = {
   mines: ['  #  ', ' ### ', '#####', ' ### ', '  #  '],
   stations: ['  #  ', '  #  ', '#####', '  #  ', '  #  '],
   leader: [' ### ', '# # #', '# # #', '# # #', ' ### '],
+}
+
+const COMMAND_LOGOS: Record<CommandType, { color: string; grid: string[] }> = {
+  MOVER: {
+    color: '#38bdf8',
+    grid: ['  #  ', ' ### ', '#####', ' ### ', '  #  ', '  #  ', '  #  '],
+  },
+  DISPARAR: {
+    color: '#f87171',
+    grid: [' ### ', '#####', ' # # ', ' # # ', '  #  ', '  #  ', '  #  '],
+  },
+  COLOCAR_MINA: {
+    color: '#facc15',
+    grid: ['  #  ', ' ### ', '#####', ' ### ', '  #  '],
+  },
+  BOMBA: {
+    color: '#ef4444',
+    grid: ['#   #', ' # # ', '  #  ', ' ### ', '#####', ' ### ', '  #  '],
+  },
+  RAD: {
+    color: '#4ade80',
+    grid: ['  #  ', ' # # ', '#   #', '  #  ', '  #  ', '  #  ', ' ### '],
+  },
+  IF: {
+    color: '#a78bfa',
+    grid: [' ### ', '#   #', '   # ', '  #  ', '     ', '  #  ', '  #  '],
+  },
+  ESPERA: {
+    color: '#94a3b8',
+    grid: ['#####', ' # # ', '  #  ', ' # # ', '#####'],
+  },
+  LABEL: {
+    color: '#f472b6',
+    grid: ['#### ', '#   #', '#### ', '#    ', '#    '],
+  },
+  JUMP: {
+    color: '#fb923c',
+    grid: [' ### ', '#   #', '    #', '  ## ', ' #   ', '#### '],
+  },
 }
 
 export function GameScreen({
@@ -114,41 +154,45 @@ export function GameScreen({
       return Math.min(programLength - 1, Math.max(0, line))
     }
 
-    if (!animatePassiveLines) {
-      setAnimatedLineByTankId((previous) => {
-        const next = { ...previous }
-        gameState.tanks.forEach((tank) => {
-          next[tank.id] = clampLine(tank.lastExecutedIp, tank.program.length)
-        })
-        return next
-      })
+    const actingTank =
+      gameState.lastActorId !== null
+        ? gameState.tanks.find((tank) => tank.id === gameState.lastActorId)
+        : undefined
+
+    if (!actingTank) {
       return
     }
 
-    gameState.tanks.forEach((tank) => {
-      const rawTrace =
-        tank.lastExecutionTrace && tank.lastExecutionTrace.length > 0
-          ? tank.lastExecutionTrace
-          : [tank.lastExecutedIp]
-      const limitedTrace = rawTrace.slice(-32)
-      const normalizedTrace = limitedTrace.map((line) => clampLine(line, tank.program.length))
+    if (!animatePassiveLines) {
+      setAnimatedLineByTankId((previous) => ({
+        ...previous,
+        [actingTank.id]: clampLine(actingTank.lastExecutedIp, actingTank.program.length),
+      }))
+      return
+    }
 
-      if (normalizedTrace.length <= 1) {
-        const finalLine = normalizedTrace[0] ?? 0
-        setAnimatedLineByTankId((previous) => ({ ...previous, [tank.id]: finalLine }))
-        return
-      }
+    const rawTrace =
+      actingTank.lastExecutionTrace && actingTank.lastExecutionTrace.length > 0
+        ? actingTank.lastExecutionTrace
+        : [actingTank.lastExecutedIp]
+    const limitedTrace = rawTrace.slice(-32)
+    const normalizedTrace = limitedTrace.map((line) => clampLine(line, actingTank.program.length))
 
-      const animationBudget = Math.max(120, Math.min(420, Math.floor(gameState.config.tickMs * 0.75)))
-      const stepMs = Math.max(35, Math.floor(animationBudget / normalizedTrace.length))
+    if (normalizedTrace.length <= 1) {
+      const finalLine = normalizedTrace[0] ?? 0
+      setAnimatedLineByTankId((previous) => ({ ...previous, [actingTank.id]: finalLine }))
+      return
+    }
 
-      normalizedTrace.forEach((line, index) => {
-        const timeoutId = window.setTimeout(() => {
-          setAnimatedLineByTankId((previous) => ({ ...previous, [tank.id]: line }))
-        }, index * stepMs)
+    const animationBudget = Math.max(120, Math.min(420, Math.floor(gameState.config.tickMs * 0.75)))
+    const stepMs = Math.max(35, Math.floor(animationBudget / normalizedTrace.length))
 
-        timers.push(timeoutId)
-      })
+    normalizedTrace.forEach((line, index) => {
+      const timeoutId = window.setTimeout(() => {
+        setAnimatedLineByTankId((previous) => ({ ...previous, [actingTank.id]: line }))
+      }, index * stepMs)
+
+      timers.push(timeoutId)
     })
 
     return () => {
@@ -284,6 +328,8 @@ export function GameScreen({
               if (effects?.has('hit')) classes.push('fx-hit')
 
               const tank = boardInfo.tankMap.get(key)
+              const isActingTank = Boolean(tank && gameState.lastActorId && tank.id === gameState.lastActorId)
+              const actingLogo = tank ? COMMAND_LOGOS[tank.lastCommandType] : undefined
 
               return (
                 <div key={key} className={classes.join(' ')}>
@@ -291,15 +337,22 @@ export function GameScreen({
                   {boardInfo.stationMap.has(key) && <div className="tile-station">+</div>}
                   {boardInfo.mineMap.has(key) && <div className="tile-mine">*</div>}
                   {tank && (
-                    <div
-                      className="tile-tank"
-                      data-dir={getTankDirection(tank)}
-                      style={{ '--tank-color': tank.color } as React.CSSProperties}
-                    >
-                      <div className="tank-turret" />
-                      <div className="tank-barrel" />
-                      <span className="tank-name">{tank.name}</span>
-                    </div>
+                    <>
+                      <div
+                        className={`tile-tank ${isActingTank ? 'is-acting' : ''}`}
+                        data-dir={getTankDirection(tank)}
+                        style={{ '--tank-color': tank.color } as React.CSSProperties}
+                      >
+                        <div className="tank-turret" />
+                        <div className="tank-barrel" />
+                        <span className="tank-name">{tank.name}</span>
+                      </div>
+                      {isActingTank && actingLogo && (
+                        <div className="tank-action-logo" title={tank.lastAction}>
+                          <PixelIcon color={actingLogo.color} grid={actingLogo.grid} />
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )
@@ -320,13 +373,18 @@ export function GameScreen({
 
             <div className="score-list">
               {gameState.tanks.map((tank) => {
+                const isActingTank = gameState.lastActorId === tank.id
+                const actionLogo = COMMAND_LOGOS[tank.lastCommandType]
+
                 const finalLine =
                   tank.program.length === 0
                     ? 0
                     : Math.min(tank.program.length - 1, Math.max(0, tank.lastExecutedIp))
 
+                const isAnimatedTank = animatePassiveLines && isActingTank
+
                 const activeLine =
-                  animatePassiveLines && animatedLineByTankId[tank.id] !== undefined
+                  isAnimatedTank && animatedLineByTankId[tank.id] !== undefined
                     ? Math.min(
                         tank.program.length > 0 ? tank.program.length - 1 : 0,
                         Math.max(0, animatedLineByTankId[tank.id] ?? finalLine),
@@ -334,10 +392,15 @@ export function GameScreen({
                     : finalLine
 
                 return (
-                  <article key={tank.id} className={`score-card ${tank.alive ? '' : 'dead'}`}>
+                  <article key={tank.id} className={`score-card ${tank.alive ? '' : 'dead'} ${isActingTank ? 'is-acting' : ''}`}>
                   <header>
                     <span className="dot" style={{ backgroundColor: tank.color }} />
                     <strong>{tank.name}</strong>
+                    {isActingTank && actionLogo && (
+                      <span className="score-action-logo" title={tank.lastAction}>
+                        <PixelIcon color={actionLogo.color} grid={actionLogo.grid} />
+                      </span>
+                    )}
                   </header>
                   <div className="tank-stats">
                     <span className="stat-chip">

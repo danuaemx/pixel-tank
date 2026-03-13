@@ -76,6 +76,7 @@ export interface Tank {
   ip: number
   lastExecutedIp: number
   lastExecutionTrace: number[]
+  lastCommandType: CommandType
   lastAction: string
   program: Command[]
   registers: TankRegisters
@@ -124,6 +125,7 @@ export interface GameState {
   effects: Effect[]
   round: number
   turnIndex: number
+  lastActorId: string | null
   finished: boolean
   winnerId?: string
   log: string[]
@@ -704,6 +706,7 @@ function executeTankTurn(state: GameState, tankIndex: number): void {
   const program = tank.program
   if (program.length === 0) {
     tank.lastAction = 'ESPERA'
+    tank.lastCommandType = 'ESPERA'
     tank.lastExecutedIp = 0
     tank.lastExecutionTrace = [0]
     return
@@ -720,6 +723,7 @@ function executeTankTurn(state: GameState, tankIndex: number): void {
 
     if (!command) {
       tank.ip = 0
+      tank.lastCommandType = 'ESPERA'
       tank.lastExecutedIp = 0
       executionTrace.push(0)
       safetyCounter += 1
@@ -727,6 +731,7 @@ function executeTankTurn(state: GameState, tankIndex: number): void {
     }
 
     const currentIp = tank.ip
+    tank.lastCommandType = command.type
 
     switch (command.type) {
       case 'LABEL': {
@@ -812,6 +817,7 @@ function executeTankTurn(state: GameState, tankIndex: number): void {
 
   if (!didAction) {
     tank.lastAction = 'ESPERA_FORZADA'
+    tank.lastCommandType = 'ESPERA'
     pushLog(state, `${tank.name} entra en bucle y espera por seguridad.`)
   }
 
@@ -903,11 +909,13 @@ export function advanceGame(previous: GameState): GameState {
 
   const actingTankIndex = findNextAliveTank(state.tanks, state.turnIndex)
   if (actingTankIndex < 0) {
+    state.lastActorId = null
     finalizeGame(state)
     return state
   }
 
   executeTankTurn(state, actingTankIndex)
+  state.lastActorId = state.tanks[actingTankIndex]?.id ?? null
 
   state.turnIndex = (actingTankIndex + 1) % state.tanks.length
   if (state.turnIndex === 0) {
@@ -1166,6 +1174,7 @@ export function createInitialGameState(config: GameConfig, programs: Command[][]
     ip: 0,
     lastExecutedIp: 0,
     lastExecutionTrace: [0],
+    lastCommandType: 'ESPERA',
     lastAction: 'LISTO',
     program: readyPrograms[index],
     registers: {
@@ -1186,6 +1195,7 @@ export function createInitialGameState(config: GameConfig, programs: Command[][]
     effects: [],
     round: 1,
     turnIndex: 0,
+    lastActorId: null,
     finished: false,
     log: ['Partida iniciada.'],
     soundEvents: [],

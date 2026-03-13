@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import './App.css'
-import { chiptuneAudio } from './audio'
+import { chiptuneAudio, type MusicTheme, type UiSoundKey } from './audio'
 import { GameScreen } from './components/GameScreen'
 import { PixelIcon } from './components/PixelIcon'
 import { PixelRange } from './components/PixelRange'
@@ -29,6 +29,7 @@ import {
 
 type Screen = 'menu' | 'tutorial' | 'config' | 'program' | 'game'
 type MenuConfirmSource = Exclude<Screen, 'menu'>
+type GameMusicTheme = Exclude<MusicTheme, 'menu'>
 
 type DragPayload =
   | {
@@ -43,6 +44,9 @@ type DragPayload =
 const DEFAULT_UI_FONT_SIZE = 17
 const MIN_UI_FONT_SIZE = 5
 const MAX_UI_FONT_SIZE = 24
+const DEFAULT_MASTER_VOLUME = 170
+const MIN_MASTER_VOLUME = 30
+const MAX_MASTER_VOLUME = 320
 
 function sanitizeUiFontSize(value: number): number {
   if (!Number.isFinite(value)) {
@@ -50,6 +54,14 @@ function sanitizeUiFontSize(value: number): number {
   }
 
   return Math.min(MAX_UI_FONT_SIZE, Math.max(MIN_UI_FONT_SIZE, Math.round(value)))
+}
+
+function sanitizeMasterVolume(value: number): number {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_MASTER_VOLUME
+  }
+
+  return Math.min(MAX_MASTER_VOLUME, Math.max(MIN_MASTER_VOLUME, Math.round(value)))
 }
 
 const NAV_ICONS = {
@@ -125,6 +137,44 @@ const REGISTER_OPTIONS: NumericRegister[] = ['RAD', 'SALUD']
 const COMPARE_OPERATORS: CompareOperator[] = ['<=', '<', '>', '>=', '==']
 const DIST_SOURCE_OPTIONS: BombDistanceSource[] = ['VAL', 'RAD', 'SALUD']
 const SHOOT_DIRECTION_OPTIONS: Array<Direction | 'RAD_DIR'> = [...DIRECTIONS, 'RAD_DIR']
+
+function getUiSoundForButton(button: HTMLButtonElement): UiSoundKey {
+  const className = typeof button.className === 'string' ? button.className.toLowerCase() : ''
+  const descriptor = `${button.getAttribute('aria-label') ?? ''} ${button.getAttribute('title') ?? ''} ${button.textContent ?? ''}`
+    .toLowerCase()
+
+  if (
+    className.includes('danger') ||
+    descriptor.includes('reiniciar') ||
+    descriptor.includes('abandonar') ||
+    descriptor.includes('eliminar')
+  ) {
+    return 'ui-danger'
+  }
+
+  if (descriptor.includes('paso') || descriptor.includes('step')) {
+    return 'ui-step'
+  }
+
+  if (
+    className.includes('tank-tab') ||
+    className.includes('program-icon-btn') ||
+    className.includes('top-control-btn') ||
+    className.includes('btn-with-icon')
+  ) {
+    return 'ui-nav'
+  }
+
+  if (
+    className.includes('small-btn') ||
+    className.includes('pixel-select-option') ||
+    className.includes('pixel-select-trigger')
+  ) {
+    return 'ui-toggle'
+  }
+
+  return 'ui-action'
+}
 
 function createDefaultCondition(kind: ConditionKind): Condition {
   if (kind === 'REGISTER_COMPARE') {
@@ -361,6 +411,7 @@ function App() {
   const [dragPayload, setDragPayload] = useState<DragPayload | null>(null)
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [running, setRunning] = useState(false)
+  const [gameMusicTheme, setGameMusicTheme] = useState<GameMusicTheme>('game')
   const [animatePassiveLines, setAnimatePassiveLines] = useState(true)
   const [restartConfirmOpen, setRestartConfirmOpen] = useState(false)
   const [showProgramTips, setShowProgramTips] = useState(true)
@@ -379,6 +430,18 @@ function App() {
 
     return sanitizeUiFontSize(Number(stored))
   })
+  const [masterVolume, setMasterVolume] = useState<number>(() => {
+    if (typeof window === 'undefined') {
+      return DEFAULT_MASTER_VOLUME
+    }
+
+    const stored = window.localStorage.getItem('master-volume')
+    if (!stored) {
+      return DEFAULT_MASTER_VOLUME
+    }
+
+    return sanitizeMasterVolume(Number(stored))
+  })
 
   const currentProgram = programs[selectedTank] ?? []
   const programAreaRef = useRef<HTMLDivElement | null>(null)
@@ -392,9 +455,78 @@ function App() {
   useEffect(() => {
     if (screen !== 'game') {
       setRunning(false)
-      chiptuneAudio.stopMusic()
     }
   }, [screen])
+
+  useEffect(() => {
+    if (screen === 'game') {
+      chiptuneAudio.startMusic(gameMusicTheme)
+      return
+    }
+
+    chiptuneAudio.startMusic('menu')
+  }, [screen, gameMusicTheme])
+
+  useEffect(() => {
+    if (chiptuneAudio.isAudioUnlocked()) {
+      return
+    }
+
+    const startCurrentTheme = () => {
+      chiptuneAudio.unlockAudio()
+      if (screen === 'game') {
+        chiptuneAudio.startMusic(gameMusicTheme)
+        return
+      }
+
+      chiptuneAudio.startMusic('menu')
+    }
+
+    window.addEventListener('pointerdown', startCurrentTheme, { capture: true, once: true })
+    window.addEventListener('keydown', startCurrentTheme, { capture: true, once: true })
+    window.addEventListener('touchstart', startCurrentTheme, { capture: true, once: true })
+
+    return () => {
+      window.removeEventListener('pointerdown', startCurrentTheme, true)
+      window.removeEventListener('keydown', startCurrentTheme, true)
+      window.removeEventListener('touchstart', startCurrentTheme, true)
+    }
+  }, [screen, gameMusicTheme])
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target
+      if (!(target instanceof Element)) {
+        return
+      }
+
+      const button = target.closest('button')
+      if (button instanceof HTMLButtonElement) {
+        if (!button.disabled) {
+          chiptuneAudio.playUi(getUiSoundForButton(button))
+        }
+        return
+      }
+
+      const toggleInput = target.closest('input[type="checkbox"]')
+      if (toggleInput instanceof HTMLInputElement) {
+        if (!toggleInput.disabled) {
+          chiptuneAudio.playUi('ui-toggle')
+        }
+        return
+      }
+
+      const toggleLabel = target.closest('label.tips-toggle')
+      if (toggleLabel) {
+        chiptuneAudio.playUi('ui-toggle')
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown, true)
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true)
+    }
+  }, [])
 
   useEffect(() => {
     if (gameState?.finished) {
@@ -428,6 +560,11 @@ function App() {
     document.documentElement.style.fontSize = `${uiFontSize}px`
     window.localStorage.setItem('ui-font-size', String(uiFontSize))
   }, [uiFontSize])
+
+  useEffect(() => {
+    chiptuneAudio.setMasterVolume(masterVolume / 100)
+    window.localStorage.setItem('master-volume', String(masterVolume))
+  }, [masterVolume])
 
   useEffect(() => {
     if (programScrollRequest === 0 || screen !== 'program') {
@@ -482,6 +619,10 @@ function App() {
     setUiFontSize(sanitizeUiFontSize(value))
   }
 
+  const updateMasterVolume = (value: number): void => {
+    setMasterVolume(sanitizeMasterVolume(value))
+  }
+
   const applyDefaultSetup = (): void => {
     const defaults = createDefaultConfig()
     setConfig(defaults)
@@ -502,6 +643,7 @@ function App() {
   }
 
   const startSimulation = (quick = false): void => {
+    const selectedTheme: GameMusicTheme = quick ? 'quick' : 'game'
     const selectedConfig = quick ? createDefaultConfig() : config
     const selectedPrograms = quick
       ? createDefaultPrograms(selectedConfig.players)
@@ -516,10 +658,11 @@ function App() {
     }
 
     const initialState = createInitialGameState(selectedConfig, selectedPrograms)
+    setGameMusicTheme(selectedTheme)
     setGameState(initialState)
     setScreen('game')
     setRunning(true)
-    chiptuneAudio.startMusic()
+    chiptuneAudio.startMusic(selectedTheme)
   }
 
   const restartSimulation = (): void => {
@@ -527,7 +670,7 @@ function App() {
     setPrograms(normalizedPrograms)
     setGameState(createInitialGameState(config, normalizedPrograms))
     setRunning(true)
-    chiptuneAudio.startMusic()
+    chiptuneAudio.startMusic(gameMusicTheme)
   }
 
   const updateSelectedProgram = (updater: (program: Command[]) => Command[]): void => {
@@ -870,6 +1013,29 @@ function App() {
               </button>
             </div>
             <div className="font-size-preview">Vista previa: paneles, botones y textos se adaptan al nuevo tamaño.</div>
+          </label>
+
+          <label className="font-size-setting">
+            <div className="font-size-header">
+              <span>Volumen base</span>
+              <strong>{masterVolume}%</strong>
+            </div>
+            <PixelRange
+              className="config-range-control"
+              title="Volumen base"
+              ariaLabel="Volumen base"
+              value={masterVolume}
+              min={MIN_MASTER_VOLUME}
+              max={MAX_MASTER_VOLUME}
+              step={5}
+              onChange={updateMasterVolume}
+            />
+            <div className="font-size-actions">
+              <button className="small-btn" type="button" onClick={() => updateMasterVolume(DEFAULT_MASTER_VOLUME)}>
+                Reset
+              </button>
+            </div>
+            <div className="font-size-preview">Controla el volumen global de música, acciones del juego y botones.</div>
           </label>
         </div>
 
