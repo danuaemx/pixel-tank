@@ -23,7 +23,16 @@ export function BoardView({ gameState, boardInfo }: BoardProps) {
           const effects = boardInfo.effectMap.get(key)
           if (effects?.has('move')) classes.push('fx-move')
           if (effects?.has('shot')) classes.push('fx-shot')
-          if (effects?.has('explosion')) classes.push('fx-explosion')
+          const explosionSvg = effects?.has('explosion-bomb')
+            ? '/effects/explosion-bomb.svg'
+            : effects?.has('explosion-mine')
+              ? '/effects/explosion-mine.svg'
+              : effects?.has('explosion-shot')
+                ? '/effects/explosion-shot.svg'
+                : effects?.has('explosion')
+                  ? '/effects/explosion-impact.svg'
+                  : null
+          if (explosionSvg) classes.push('fx-explosion')
           if (effects?.has('heal')) classes.push('fx-heal')
           if (effects?.has('mine')) classes.push('fx-mine')
           if (effects?.has('hit')) classes.push('fx-hit')
@@ -35,8 +44,12 @@ export function BoardView({ gameState, boardInfo }: BoardProps) {
           return (
             <div key={key} className={classes.join(' ')}>
               {gameState.walls.has(key) && <div className="tile-wall" />}
-              {boardInfo.stationMap.has(key) && <div className="tile-station">+</div>}
-              {boardInfo.mineMap.has(key) && <div className="tile-mine">*</div>}
+              {boardInfo.stationMap.has(key) && <div className="tile-station" aria-label="Estación de salud" />}
+              {boardInfo.mineMap.has(key) && (
+                <div className="tile-mine">
+                  <img src="/effects/mine-advanced.svg" alt="" aria-hidden="true" />
+                </div>
+              )}
               {tank && (
                 <>
                   <div
@@ -54,6 +67,11 @@ export function BoardView({ gameState, boardInfo }: BoardProps) {
                     </div>
                   )}
                 </>
+              )}
+              {explosionSvg && (
+                <div className="tile-effect-svg fx-explosion-svg">
+                  <img src={explosionSvg} alt="" aria-hidden="true" />
+                </div>
               )}
             </div>
           )

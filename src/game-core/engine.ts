@@ -24,6 +24,8 @@ import type {
   Tank,
 } from './types'
 
+type ExplosionKind = 'explosion' | 'explosion-shot' | 'explosion-mine' | 'explosion-bomb'
+
 function pushLog(state: GameState, message: string): void {
   state.log = [`[R${state.round}] ${message}`, ...state.log].slice(0, 120)
 }
@@ -103,7 +105,13 @@ function applyDamage(
   }
 }
 
-function damageStationsInArea(state: GameState, x: number, y: number, sourceIndex?: number): void {
+function damageStationsInArea(
+  state: GameState,
+  x: number,
+  y: number,
+  sourceIndex?: number,
+  explosionKind: ExplosionKind = 'explosion',
+): void {
   const stationIndex = getStationAt(state, x, y)
   if (stationIndex < 0) {
     return
@@ -114,7 +122,7 @@ function damageStationsInArea(state: GameState, x: number, y: number, sourceInde
   if (state.stations[stationIndex].hp <= 0) {
     const destroyed = state.stations.splice(stationIndex, 1)[0]
     pushLog(state, `Estación en (${destroyed.x},${destroyed.y}) destruida.`)
-    addEffect(state, 'explosion', destroyed.x, destroyed.y, 2)
+    addEffect(state, explosionKind, destroyed.x, destroyed.y, 2)
 
     if (sourceIndex !== undefined && sourceIndex >= 0) {
       const attacker = state.tanks[sourceIndex]
@@ -229,7 +237,7 @@ function performMove(state: GameState, tankIndex: number, dir: Direction): void 
     const ownerIndex = state.tanks.findIndex((candidate) => candidate.id === mine.ownerId)
     state.mines.splice(mineIndex, 1)
     applyDamage(state, tankIndex, 40, opposite(dir), ownerIndex >= 0 ? ownerIndex : undefined)
-    addEffect(state, 'explosion', tank.x, tank.y, 3)
+    addEffect(state, 'explosion-mine', tank.x, tank.y, 3)
     pushSound(state, 'bomb')
     pushLog(state, `${tank.name} pisa una mina (-40).`)
   }
@@ -266,19 +274,20 @@ function performShoot(state: GameState, tankIndex: number, dir: Direction): void
 
     const stationIndex = getStationAt(state, x, y)
     if (stationIndex >= 0) {
-      damageStationsInArea(state, x, y, tankIndex)
+      damageStationsInArea(state, x, y, tankIndex, 'explosion-shot')
       break
     }
 
     const mineIndex = getMineAt(state, x, y)
     if (mineIndex >= 0) {
       state.mines.splice(mineIndex, 1)
-      addEffect(state, 'explosion', x, y, 2)
+      addEffect(state, 'explosion-shot', x, y, 2)
       break
     }
 
     const hitTankIndex = getTankAt(state, x, y, shooter.id)
     if (hitTankIndex >= 0) {
+      addEffect(state, 'explosion-shot', x, y, 2)
       applyDamage(state, hitTankIndex, 20, opposite(dir), tankIndex)
       break
     }
@@ -358,7 +367,7 @@ function performBomb(state: GameState, tankIndex: number, dir: Direction, dist: 
 
       const chebyshev = Math.max(Math.abs(x - targetX), Math.abs(y - targetY))
       if (chebyshev <= 2) {
-        addEffect(state, 'explosion', x, y, chebyshev <= 1 ? 3 : 2)
+        addEffect(state, 'explosion-bomb', x, y, chebyshev <= 1 ? 3 : 2)
       }
     }
   }
@@ -393,7 +402,7 @@ function performBomb(state: GameState, tankIndex: number, dir: Direction, dist: 
       if (!inBounds(state.config.gridSize, x, y)) {
         continue
       }
-      damageStationsInArea(state, x, y, tankIndex)
+      damageStationsInArea(state, x, y, tankIndex, 'explosion-bomb')
     }
   }
 

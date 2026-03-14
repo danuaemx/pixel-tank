@@ -127,7 +127,10 @@ export function GameScreen({
 
       {gameState.finished && (
         <div className="result-box">
-          <h3>Resultado final</h3>
+          <h3 className="result-title">
+            <img src="/effects/trophy.svg" alt="" aria-hidden="true" />
+            <span>Resultado final</span>
+          </h3>
           <ol>
             {ranking.map((tank) => (
               <li key={`rank-${tank.id}`}>

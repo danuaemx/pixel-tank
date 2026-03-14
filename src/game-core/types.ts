@@ -96,7 +96,16 @@ export interface Station {
   hp: number
 }
 
-export type EffectKind = 'move' | 'shot' | 'explosion' | 'heal' | 'mine' | 'hit'
+export type EffectKind =
+  | 'move'
+  | 'shot'
+  | 'explosion'
+  | 'explosion-shot'
+  | 'explosion-mine'
+  | 'explosion-bomb'
+  | 'heal'
+  | 'mine'
+  | 'hit'
 
 export interface Effect {
   id: string

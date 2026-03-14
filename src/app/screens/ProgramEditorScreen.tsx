@@ -131,7 +131,17 @@ export function ProgramEditorScreen({
           <h3>Comandos</h3>
           <ul>
             {COMMAND_LIBRARY.map((item) => (
-              <li key={item.type} className="palette-item">
+              <li
+                key={item.type}
+                className="palette-item"
+                draggable
+                onDragStart={(event) => {
+                  event.dataTransfer.effectAllowed = 'copy'
+                  event.dataTransfer.setData('text/plain', item.type)
+                  setDragPayload({ kind: 'palette', commandType: item.type })
+                }}
+                onDragEnd={() => setDragPayload(null)}
+              >
                 <div className="palette-header">
                   <span className="palette-icon">
                     <PixelIcon color={item.logo.color} grid={item.logo.grid} />
@@ -158,6 +168,19 @@ export function ProgramEditorScreen({
           <h3>Programa de T{selectedTank + 1}</h3>
 
           <ul className="program-list">
+            {currentProgram.length === 0 && (
+              <li
+                className="program-drop-placeholder"
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  event.preventDefault()
+                  handleDropAt(0)
+                }}
+              >
+                Arrastra un comando aquí
+              </li>
+            )}
+
             {currentProgram.map((command, index) => {
               const condition = getCondition(command)
               const bombDistSource = command.distSource ?? 'VAL'
@@ -175,11 +198,16 @@ export function ProgramEditorScreen({
                     .filter(Boolean)
                     .join(' ')}
                   draggable
-                  onDragStart={() => setDragPayload({ kind: 'program', index })}
+                  onDragStart={(event) => {
+                    event.dataTransfer.effectAllowed = 'move'
+                    event.dataTransfer.setData('text/plain', String(index))
+                    setDragPayload({ kind: 'program', index })
+                  }}
                   onDragEnd={() => setDragPayload(null)}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={(event) => {
                     event.preventDefault()
+                    event.stopPropagation()
                     const targetIndex =
                       dragPayload?.kind === 'program' && dragPayload.index < index ? index + 1 : index
                     handleDropAt(targetIndex)
