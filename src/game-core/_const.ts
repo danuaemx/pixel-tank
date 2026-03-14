@@ -6,6 +6,12 @@ export const MIN_GRID_SIZE = 6
 export const MAX_GRID_SIZE = 15
 export const MIN_PASSIVE_LIMIT = 0
 export const MAX_PASSIVE_LIMIT = 50
+export const MIN_MAX_ROUNDS = 20
+export const MAX_MAX_ROUNDS = 500
+export const MIN_BOMBS_PER_TANK = 0
+export const MAX_BOMBS_PER_TANK = 10
+export const MIN_MINES_PER_TANK = 0
+export const MAX_MINES_PER_TANK = 10
 
 export const DIRECTIONS: Direction[] = ['N', 'S', 'E', 'O']
 

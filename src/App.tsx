@@ -26,6 +26,12 @@ import {
   createDefaultConfig,
   createDefaultPrograms,
   createInitialGameState,
+  MAX_BOMBS_PER_TANK,
+  MAX_MAX_ROUNDS,
+  MAX_MINES_PER_TANK,
+  MIN_BOMBS_PER_TANK,
+  MIN_MAX_ROUNDS,
+  MIN_MINES_PER_TANK,
   normalizeProgramsForPlayers,
   type Command,
   type CommandType,
@@ -247,6 +253,21 @@ function App() {
   const updatePassiveLimit = (value: number): void => {
     const passiveLimit = Math.min(50, Math.max(0, value))
     setConfig((previous) => ({ ...previous, passiveLimit }))
+  }
+
+  const updateMaxRounds = (value: number): void => {
+    const maxRounds = Math.min(MAX_MAX_ROUNDS, Math.max(MIN_MAX_ROUNDS, value))
+    setConfig((previous) => ({ ...previous, maxRounds }))
+  }
+
+  const updateBombsPerTank = (value: number): void => {
+    const bombsPerTank = Math.min(MAX_BOMBS_PER_TANK, Math.max(MIN_BOMBS_PER_TANK, value))
+    setConfig((previous) => ({ ...previous, bombsPerTank }))
+  }
+
+  const updateMinesPerTank = (value: number): void => {
+    const minesPerTank = Math.min(MAX_MINES_PER_TANK, Math.max(MIN_MINES_PER_TANK, value))
+    setConfig((previous) => ({ ...previous, minesPerTank }))
   }
 
   const updateUiFontSize = (value: number): void => {
@@ -537,6 +558,9 @@ function App() {
         updatePlayers={updatePlayers}
         updateGridSize={updateGridSize}
         updatePassiveLimit={updatePassiveLimit}
+        updateMaxRounds={updateMaxRounds}
+        updateBombsPerTank={updateBombsPerTank}
+        updateMinesPerTank={updateMinesPerTank}
         updateUiFontSize={updateUiFontSize}
         updateMasterVolume={updateMasterVolume}
         applyDefaultSetup={applyDefaultSetup}

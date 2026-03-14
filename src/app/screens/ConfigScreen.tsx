@@ -9,6 +9,20 @@ import {
   MIN_UI_FONT_SIZE,
   NAV_ICONS,
 } from '../_const'
+import {
+  MAX_BOMBS_PER_TANK,
+  MAX_GRID_SIZE,
+  MAX_MAX_ROUNDS,
+  MAX_MINES_PER_TANK,
+  MAX_PASSIVE_LIMIT,
+  MAX_PLAYERS,
+  MIN_BOMBS_PER_TANK,
+  MIN_GRID_SIZE,
+  MIN_MAX_ROUNDS,
+  MIN_MINES_PER_TANK,
+  MIN_PASSIVE_LIMIT,
+  MIN_PLAYERS,
+} from '../../game'
 import type { GameConfig } from '../../game'
 
 type ConfigScreenProps = {
@@ -25,6 +39,9 @@ type ConfigScreenProps = {
   updatePlayers: (value: number) => void
   updateGridSize: (value: number) => void
   updatePassiveLimit: (value: number) => void
+  updateMaxRounds: (value: number) => void
+  updateBombsPerTank: (value: number) => void
+  updateMinesPerTank: (value: number) => void
   updateUiFontSize: (value: number) => void
   updateMasterVolume: (value: number) => void
   applyDefaultSetup: () => void
@@ -41,6 +58,9 @@ export function ConfigScreen({
   updatePlayers,
   updateGridSize,
   updatePassiveLimit,
+  updateMaxRounds,
+  updateBombsPerTank,
+  updateMinesPerTank,
   updateUiFontSize,
   updateMasterVolume,
   applyDefaultSetup,
@@ -53,19 +73,58 @@ export function ConfigScreen({
       <h2>Configuración</h2>
       <p className="config-lead">Ajusta reglas de partida y tamaño de interfaz antes de iniciar.</p>
       <div className="config-grid">
-        <label>
-          Número de tanques (2-6)
-          {renderConfigStepper(config.players, 2, 6, updatePlayers, 'número de tanques')}
+        <label className="config-compact-setting">
+          Número de tanques ({MIN_PLAYERS}-{MAX_PLAYERS})
+          {renderConfigStepper(config.players, MIN_PLAYERS, MAX_PLAYERS, updatePlayers, 'número de tanques')}
         </label>
 
-        <label>
-          Tamaño del grid (6-15)
-          {renderConfigStepper(config.gridSize, 6, 15, updateGridSize, 'tamaño del grid')}
+        <label className="config-compact-setting">
+          Tamaño del grid ({MIN_GRID_SIZE}-{MAX_GRID_SIZE})
+          {renderConfigStepper(config.gridSize, MIN_GRID_SIZE, MAX_GRID_SIZE, updateGridSize, 'tamaño del grid')}
         </label>
 
-        <label>
+        <label className="config-compact-setting">
           Líneas pasivas permitidas
-          {renderConfigStepper(config.passiveLimit, 0, 50, updatePassiveLimit, 'líneas pasivas')}
+          {renderConfigStepper(
+            config.passiveLimit,
+            MIN_PASSIVE_LIMIT,
+            MAX_PASSIVE_LIMIT,
+            updatePassiveLimit,
+            'líneas pasivas',
+          )}
+        </label>
+
+        <label className="config-compact-setting">
+          Número máximo de rondas ({MIN_MAX_ROUNDS}-{MAX_MAX_ROUNDS})
+          {renderConfigStepper(
+            config.maxRounds,
+            MIN_MAX_ROUNDS,
+            MAX_MAX_ROUNDS,
+            updateMaxRounds,
+            'número máximo de rondas',
+          )}
+        </label>
+
+        <label className="config-compact-setting">
+          Bombas por jugador ({MIN_BOMBS_PER_TANK}-{MAX_BOMBS_PER_TANK})
+          {renderConfigStepper(
+            config.bombsPerTank,
+            MIN_BOMBS_PER_TANK,
+            MAX_BOMBS_PER_TANK,
+            updateBombsPerTank,
+            'bombas por jugador',
+          )}
+        </label>
+
+        <label className="config-compact-setting">
+          Minas por jugador ({MIN_MINES_PER_TANK}-{MAX_MINES_PER_TANK})
+          {renderConfigStepper(
+            config.minesPerTank,
+            MIN_MINES_PER_TANK,
+            MAX_MINES_PER_TANK,
+            updateMinesPerTank,
+            'minas por jugador',
+          )}
         </label>
 
         <label className="font-size-setting">

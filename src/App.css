@@ -53,6 +53,13 @@
   gap: 16px;
 }
 
+.menu-screen.panel,
+.config-screen.panel,
+.editor-screen.panel,
+.tutorial-screen.panel {
+  background: rgba(63, 63, 70, 0.82);
+}
+
 .menu-actions {
   display: flex;
   flex-direction: column;
@@ -238,6 +245,29 @@
   border: 3px solid #000;
   padding: 12px;
   box-shadow: inset -2px -2px 0 rgba(0,0,0,0.35), inset 2px 2px 0 rgba(255,255,255,0.12);
+}
+
+.config-grid > label.config-compact-setting {
+  padding: 8px 10px;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+
+.config-compact-setting .config-stepper {
+  gap: 4px;
+}
+
+.config-compact-setting .config-step-btn {
+  min-height: 28px;
+  min-width: 28px;
+  padding: 2px 6px;
+  font-size: 0.8rem;
+}
+
+.config-compact-setting .config-number-input {
+  min-height: 28px;
+  padding: 4px;
+  font-size: 0.78rem;
 }
 
 .config-stepper {
@@ -513,12 +543,12 @@ select:focus {
   grid-template-columns: 340px 1fr;
   gap: 0;
   border: 4px solid #000;
-  background: #1f2937;
+  background: rgba(31, 41, 55, 0.86);
 }
 
 .palette {
   border-right: 4px solid #000;
-  background: #27272a;
+  background: rgba(39, 39, 42, 0.84);
   padding: 16px;
   height: 500px;
   overflow-y: auto;
@@ -526,6 +556,7 @@ select:focus {
 
 .program-area {
   padding: 16px;
+  background: rgba(17, 24, 39, 0.45);
   height: 500px;
   overflow-y: auto;
 }
@@ -1472,6 +1503,8 @@ select:focus {
   padding: 40px 0;
   margin-bottom: 20px;
   background: repeating-linear-gradient(45deg, #111827, #111827 10px, #1f2937 10px, #1f2937 20px);
+  background-size: 28px 28px;
+  animation: heroBannerStripesLeft 5s linear infinite;
   border: 4px solid #000;
   box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
 }
@@ -1483,6 +1516,15 @@ select:focus {
   margin: 0;
   letter-spacing: 2px;
   text-transform: uppercase;
+}
+
+@keyframes heroBannerStripesLeft {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -56px 0;
+  }
 }
 
 
@@ -1644,6 +1686,14 @@ body {
   padding: 4px 6px;
   border: 4px solid #000;
   box-shadow: inset -2px -2px 0 rgba(0,0,0,0.5), inset 2px 2px 0 rgba(255,255,255,0.1);
+}
+
+.speed-control-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  filter: drop-shadow(0 0 2px rgba(252, 211, 77, 0.6));
 }
 
 .speed-range-control {
@@ -1817,6 +1867,17 @@ body, html, #root {
   margin: 16px;
   max-height: calc(100vh - 32px);
   max-width: calc(100vw - 32px);
+}
+
+.editor-screen.panel {
+  max-width: calc(100vw - 10px);
+  max-height: calc(100vh - 10px);
+  margin: 5px;
+}
+
+.editor-screen .palette,
+.editor-screen .program-area {
+  height: clamp(500px, calc(100vh - 240px), 760px);
 }
 
 /* Fix board square sizing max */

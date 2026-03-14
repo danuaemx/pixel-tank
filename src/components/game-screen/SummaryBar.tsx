@@ -18,6 +18,11 @@ export function SummaryBar({
   onBackToMenu,
   onTickMsChange,
 }: SummaryBarProps) {
+  const minTickMs = 180
+  const maxTickMs = 1400
+  const speedSliderValue = Math.min(maxTickMs, Math.max(minTickMs, maxTickMs + minTickMs - gameState.config.tickMs))
+  const speedPercent = Math.round(((speedSliderValue - minTickMs) / (maxTickMs - minTickMs)) * 100)
+
   return (
     <div className="game-summary-head panel">
       <div className="summary-head-row">
@@ -74,16 +79,18 @@ export function SummaryBar({
           <button className="pixel-btn top-control-btn" title="Volver al menú" aria-label="Volver al menú" onClick={onBackToMenu}>
             <PixelIcon color="#064e3b" grid={CONTROL_ICONS.menu} />
           </button>
-          <div className="speed-control-top" title={`Velocidad: ${gameState.config.tickMs}ms`}>
-            <PixelIcon color="#fff" grid={CONTROL_ICONS.speed} />
+          <div className="speed-control-top" title={`Velocidad: ${speedPercent}% (${gameState.config.tickMs}ms)`}>
+            <span className="speed-control-icon" aria-hidden="true">
+              <PixelIcon color="#fcd34d" grid={CONTROL_ICONS.speed} />
+            </span>
             <PixelRange
               className="speed-range-control"
-              ariaLabel="Velocidad de simulación"
-              value={gameState.config.tickMs}
-              min={180}
-              max={1400}
+              ariaLabel="Velocidad de simulación (izquierda lento, derecha rápido)"
+              value={speedSliderValue}
+              min={minTickMs}
+              max={maxTickMs}
               step={20}
-              onChange={onTickMsChange}
+              onChange={(nextSpeedValue) => onTickMsChange(maxTickMs + minTickMs - nextSpeedValue)}
             />
           </div>
           <label className="tips-toggle game-passive-toggle" title="Animar ejecución de líneas pasivas">

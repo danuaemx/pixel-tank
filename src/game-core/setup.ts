@@ -1,13 +1,19 @@
 import {
+  MAX_BOMBS_PER_TANK,
   MAX_GRID_SIZE,
+  MAX_MAX_ROUNDS,
+  MAX_MINES_PER_TANK,
   MAX_PASSIVE_LIMIT,
   MAX_PLAYERS,
+  MIN_BOMBS_PER_TANK,
   MIN_GRID_SIZE,
+  MIN_MAX_ROUNDS,
+  MIN_MINES_PER_TANK,
   MIN_PASSIVE_LIMIT,
   MIN_PLAYERS,
   TANK_COLORS,
 } from './_const'
-import { cellKey, clamp, createId, inBounds, pickRandomFreeCell } from './utils'
+import { cellKey, clamp, createId, pickRandomFreeCell } from './utils'
 import type { Command, CommandType, GameConfig, GameState, Station, Tank } from './types'
 
 export function createCommandTemplate(type: CommandType): Command {
@@ -40,6 +46,8 @@ export function createDefaultConfig(): GameConfig {
     gridSize: 10,
     passiveLimit: 8,
     maxRounds: 140,
+    bombsPerTank: 2,
+    minesPerTank: 3,
     wallDensity: 0.09,
     stationCount: 2,
     tickMs: 700,
@@ -163,56 +171,123 @@ export function normalizeProgramsForPlayers(programs: Command[][], players: numb
   return normalized
 }
 
+function createRandomWallSegments(size: number): Array<Array<{ x: number; y: number }>> {
+  const segments: Array<Array<{ x: number; y: number }>> = []
+  const spacing = 4
+  const anchorOffsets: Array<{ x: number; y: number }> = [
+    { x: 0, y: 0 },
+    { x: 2, y: 2 },
+    { x: 0, y: 2 },
+    { x: 2, y: 0 },
+  ]
+
+  const anchors: Array<{ x: number; y: number }> = []
+
+  for (const { x: offsetX, y: offsetY } of anchorOffsets) {
+    for (let y = offsetY; y < size; y += spacing) {
+      for (let x = offsetX; x < size; x += spacing) {
+        anchors.push({ x, y })
+      }
+    }
+  }
+
+  for (let index = anchors.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    ;[anchors[index], anchors[swapIndex]] = [anchors[swapIndex], anchors[index]]
+  }
+
+  let nextOrientation: 'H' | 'V' = Math.random() < 0.5 ? 'H' : 'V'
+
+  for (const anchor of anchors) {
+    const horizontal =
+      anchor.x <= size - 3
+        ? [
+            { x: anchor.x, y: anchor.y },
+            { x: anchor.x + 1, y: anchor.y },
+            { x: anchor.x + 2, y: anchor.y },
+          ]
+        : null
+
+    const vertical =
+      anchor.y <= size - 3
+        ? [
+            { x: anchor.x, y: anchor.y },
+            { x: anchor.x, y: anchor.y + 1 },
+            { x: anchor.x, y: anchor.y + 2 },
+          ]
+        : null
+
+    if (!horizontal && !vertical) {
+      continue
+    }
+
+    if (nextOrientation === 'H') {
+      const selected = horizontal ?? vertical
+      if (selected) {
+        segments.push(selected)
+        nextOrientation = selected === horizontal ? 'V' : 'H'
+      }
+      continue
+    }
+
+    const selected = vertical ?? horizontal
+    if (selected) {
+      segments.push(selected)
+      nextOrientation = selected === vertical ? 'H' : 'V'
+    }
+  }
+
+  return segments
+}
+
 export function createInitialGameState(config: GameConfig, programs: Command[][]): GameState {
   const safeConfig: GameConfig = {
     ...config,
     players: clamp(config.players, MIN_PLAYERS, MAX_PLAYERS),
     gridSize: clamp(config.gridSize, MIN_GRID_SIZE, MAX_GRID_SIZE),
     passiveLimit: clamp(config.passiveLimit, MIN_PASSIVE_LIMIT, MAX_PASSIVE_LIMIT),
+    maxRounds: clamp(config.maxRounds, MIN_MAX_ROUNDS, MAX_MAX_ROUNDS),
+    bombsPerTank: clamp(config.bombsPerTank, MIN_BOMBS_PER_TANK, MAX_BOMBS_PER_TANK),
+    minesPerTank: clamp(config.minesPerTank, MIN_MINES_PER_TANK, MAX_MINES_PER_TANK),
   }
 
   const readyPrograms = normalizeProgramsForPlayers(programs, safeConfig.players)
 
-  const preferredSpawns: Array<{ x: number; y: number }> = [
-    { x: 0, y: 0 },
-    { x: safeConfig.gridSize - 1, y: safeConfig.gridSize - 1 },
-    { x: 0, y: safeConfig.gridSize - 1 },
-    { x: safeConfig.gridSize - 1, y: 0 },
-    { x: Math.floor(safeConfig.gridSize / 2), y: 0 },
-    { x: Math.floor(safeConfig.gridSize / 2), y: safeConfig.gridSize - 1 },
-  ]
+  const totalCells = safeConfig.gridSize * safeConfig.gridSize
+  const maxWallsByCapacity = Math.max(0, totalCells - safeConfig.players - safeConfig.stationCount)
+  const requestedWallCells = Math.floor(totalCells * safeConfig.wallDensity)
+  const wallsTarget = Math.min(requestedWallCells, maxWallsByCapacity)
+  const wallSegmentsTarget = Math.floor(wallsTarget / 3)
 
+  const walls = new Set<string>()
   const occupied = new Set<string>()
+  const wallSegments = createRandomWallSegments(safeConfig.gridSize)
+
+  for (const segment of wallSegments) {
+    if (walls.size >= wallSegmentsTarget * 3) {
+      break
+    }
+
+    const canPlace = segment.every(({ x, y }) => !occupied.has(cellKey(x, y)))
+    if (!canPlace) {
+      continue
+    }
+
+    segment.forEach(({ x, y }) => {
+      const key = cellKey(x, y)
+      walls.add(key)
+      occupied.add(key)
+    })
+  }
+
   const positions: Array<{ x: number; y: number }> = []
 
   for (let index = 0; index < safeConfig.players; index += 1) {
-    let position = preferredSpawns[index]
-
-    if (
-      !position ||
-      !inBounds(safeConfig.gridSize, position.x, position.y) ||
-      occupied.has(cellKey(position.x, position.y))
-    ) {
-      const randomPosition = pickRandomFreeCell(safeConfig.gridSize, occupied)
-      position = randomPosition ?? { x: 0, y: 0 }
-    }
+    const randomPosition = pickRandomFreeCell(safeConfig.gridSize, occupied)
+    const position = randomPosition ?? { x: index % safeConfig.gridSize, y: Math.floor(index / safeConfig.gridSize) }
 
     occupied.add(cellKey(position.x, position.y))
     positions.push(position)
-  }
-
-  const walls = new Set<string>()
-  const wallsTarget = Math.floor(safeConfig.gridSize * safeConfig.gridSize * safeConfig.wallDensity)
-
-  while (walls.size < wallsTarget) {
-    const x = Math.floor(Math.random() * safeConfig.gridSize)
-    const y = Math.floor(Math.random() * safeConfig.gridSize)
-    const key = cellKey(x, y)
-
-    if (!occupied.has(key)) {
-      walls.add(key)
-      occupied.add(key)
-    }
   }
 
   const stations: Station[] = []
@@ -243,8 +318,8 @@ export function createInitialGameState(config: GameConfig, programs: Command[][]
     health: 100,
     kills: 0,
     score: 0,
-    bombsLeft: 2,
-    minesLeft: 3,
+    bombsLeft: safeConfig.bombsPerTank,
+    minesLeft: safeConfig.minesPerTank,
     ip: 0,
     lastExecutedIp: 0,
     lastExecutionTrace: [0],

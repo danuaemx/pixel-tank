@@ -111,6 +111,8 @@ export interface GameConfig {
   gridSize: number
   passiveLimit: number
   maxRounds: number
+  bombsPerTank: number
+  minesPerTank: number
   wallDensity: number
   stationCount: number
   tickMs: number
