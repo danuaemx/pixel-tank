@@ -48,3 +48,15 @@ npm run build
   - Puntuación por eliminaciones y salud final, con bonus de eficiencia para código más corto.
 - Animaciones visuales para disparo, explosión, impacto, curación y minas.
 - Sonidos y música 8-bit generados con Web Audio API.
+
+## Mapa rápido del código
+
+- `src/main.tsx`: punto de entrada; monta React y carga estilos globales.
+- `src/App.tsx`: coordina pantallas, estado global, audio y navegación.
+- `src/game.ts`: reexporta el motor para que la app importe todo desde un solo sitio.
+- `src/game-core/setup.ts`: crea configuraciones, programas por defecto y el estado inicial.
+- `src/game-core/engine.ts`: ejecuta los turnos y aplica las reglas de combate.
+- `src/game-core/utils.ts`: utilidades de cálculo, búsqueda y evaluación de condiciones.
+- `src/audio.ts`: reproduce sonidos y música 8-bit.
+- `src/app/screens/`: pantallas de menú, configuración, tutorial y editor de programas.
+- `src/components/`: UI compartida de la partida y piezas visuales reutilizables.

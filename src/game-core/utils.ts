@@ -106,6 +106,7 @@ export function evaluateCondition(condition: Condition | undefined, tank: Tank):
     case 'TRUE':
       return true
     case 'REGISTER_COMPARE': {
+      // Las condiciones de registro comparan el valor normalizado del registro elegido con el literal de la regla.
       const register = safeCondition.register ?? 'RAD'
       const operator = safeCondition.operator ?? '=='
       const comparedValue = safeCondition.value ?? 0
@@ -126,6 +127,7 @@ export function getLabelMap(program: Command[]): Map<string, number> {
 
   program.forEach((command, index) => {
     if (command.type === 'LABEL' && command.label) {
+      // Normalizamos etiquetas para que los saltos no dependan de mayúsculas, espacios o formato de entrada.
       labelMap.set(command.label.trim().toUpperCase(), index)
     }
   })
@@ -149,6 +151,7 @@ export function pickRandomFreeCell(size: number, occupied: Set<string>): { x: nu
     return null
   }
 
+  // Elegimos una celda libre entre todas las disponibles, no solo la primera.
   const randomKey = freeCells[Math.floor(Math.random() * freeCells.length)]
   return keyToPoint(randomKey)
 }

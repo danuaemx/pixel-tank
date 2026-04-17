@@ -152,6 +152,7 @@ function getRadReading(state: GameState, tank: Tank, dir: Direction): number {
       getTankAt(state, x, y, tank.id) >= 0
 
     if (hasBlockingElement) {
+      // Un obstáculo devuelve distancia negativa: la dirección está ocupada antes de llegar a una estación.
       return -distance
     }
 
@@ -188,6 +189,7 @@ function moveStations(state: GameState): void {
   const occupied = createOccupiedSet(state)
 
   state.stations.forEach((station) => {
+    // Quitamos la estación actual del conjunto para poder reubicarla sin bloquearse a sí misma.
     occupied.delete(cellKey(station.x, station.y))
 
     const destination = pickRandomFreeCell(state.config.gridSize, occupied)
@@ -347,6 +349,7 @@ function performBomb(state: GameState, tankIndex: number, dir: Direction, dist: 
   let targetX = tank.x
   let targetY = tank.y
 
+  // La bomba avanza casilla a casilla y se detiene en el borde del mapa.
   for (let step = 0; step < Math.max(1, dist); step += 1) {
     const nx = targetX + vector.x
     const ny = targetY + vector.y
@@ -386,6 +389,7 @@ function performBomb(state: GameState, tankIndex: number, dir: Direction, dist: 
   })
 
   const minesToRemove = state.mines.filter((mine) => {
+  // La explosión afecta un cuadrado 5x5 alrededor del impacto, con intensidad por distancia Chebyshev.
     const chebyshev = Math.max(Math.abs(mine.x - targetX), Math.abs(mine.y - targetY))
     return chebyshev <= 2
   })
@@ -518,6 +522,7 @@ function executeTankTurn(state: GameState, tankIndex: number): void {
     executionTrace.push(currentIp)
 
     if (!didAction && passiveCount > state.config.passiveLimit) {
+      // Si el programa solo produce saltos o comprobaciones, forzamos una salida para evitar bucles infinitos.
       tank.lastAction = 'ESPERA_FORZADA'
       pushLog(
         state,

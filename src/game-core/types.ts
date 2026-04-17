@@ -1,3 +1,5 @@
+// Este archivo define los tipos utilizados en el juego de tanques.
+
 export type Direction = 'N' | 'S' | 'E' | 'O'
 export type RegisterDirection = Direction | 'NONE'
 

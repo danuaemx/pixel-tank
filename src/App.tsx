@@ -41,6 +41,7 @@ import {
 } from './game'
 
 function App() {
+  // Estado principal de la aplicación: pantalla activa, configuración y sesión de juego.
   const [screen, setScreen] = useState<Screen>('menu')
   const [config, setConfig] = useState<GameConfig>(() => createDefaultConfig())
   const [programs, setPrograms] = useState<Command[][]>(() => {
@@ -86,6 +87,7 @@ function App() {
   const currentProgram = programs[selectedTank] ?? []
   const programAreaRef = useRef<HTMLDivElement | null>(null)
 
+  // Efectos globales: audio, cierre de pestaña, música y sincronización del juego.
   useEffect(() => {
     return () => {
       chiptuneAudio.stopMusic()
@@ -125,6 +127,7 @@ function App() {
     }
 
     const startCurrentTheme = () => {
+      // El navegador solo permite iniciar el audio después de una interacción real.
       chiptuneAudio.unlockAudio()
       if (screen === 'game') {
         chiptuneAudio.startMusic(gameMusicTheme)
@@ -250,6 +253,7 @@ function App() {
     }
   }, [recentlyAddedCommandId])
 
+  // Acciones generales de configuración y partida.
   const updatePlayers = (value: number): void => {
     const players = Math.min(6, Math.max(2, value))
     setConfig((previous) => ({ ...previous, players }))
@@ -317,6 +321,7 @@ function App() {
       : normalizeProgramsForPlayers(programs, selectedConfig.players)
 
     if (quick) {
+      // El arranque rápido usa un estado limpio para no mezclarlo con la edición actual.
       setConfig(selectedConfig)
       setPrograms(selectedPrograms)
       setSelectedTank(0)
@@ -340,6 +345,7 @@ function App() {
     chiptuneAudio.startMusic(gameMusicTheme)
   }
 
+  // Edición del programa seleccionado.
   const updateSelectedProgram = (updater: (program: Command[]) => Command[]): void => {
     setPrograms((previous) => {
       const next = previous.map((program) => [...program])
@@ -458,6 +464,7 @@ function App() {
     return depth
   }
 
+  // Helpers de render reutilizados por varias pantallas.
   const renderProgramField = (label: string, control: React.ReactNode, className?: string) => {
     return (
       <label className={['field-stack', className].filter(Boolean).join(' ')}>
@@ -486,6 +493,7 @@ function App() {
         >
           -
         </button>
+      // Confirmaciones de navegación y reinicio.
         <input
           className="config-number-input"
           type="number"
