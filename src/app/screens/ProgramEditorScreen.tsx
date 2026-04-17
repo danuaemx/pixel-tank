@@ -39,8 +39,6 @@ type ProgramEditorScreenProps = {
   setSelectedTank: (index: number) => void
   setDragPayload: (payload: DragPayload | null) => void
   addCommandByClick: (type: CommandType) => void
-  moveCommandUp: (index: number) => void
-  moveCommandDown: (index: number, total: number) => void
   removeCommand: (index: number) => void
   handleDropAt: (index: number) => void
   patchCommand: (index: number, updater: (command: Command) => void) => void
@@ -64,8 +62,6 @@ export function ProgramEditorScreen({
   setSelectedTank,
   setDragPayload,
   addCommandByClick,
-  moveCommandUp,
-  moveCommandDown,
   removeCommand,
   handleDropAt,
   patchCommand,
@@ -76,6 +72,76 @@ export function ProgramEditorScreen({
   onStartSimulation,
   onBackToMenu,
 }: ProgramEditorScreenProps) {
+  const formatCommandTypeLabel = (type: CommandType): string => {
+    const labels: Record<CommandType, string> = {
+      MOVER: 'Mover',
+      DISPARAR: 'Disparar',
+      COLOCAR_MINA: 'Colocar_mina',
+      BOMBA: 'Bomba',
+      RAD: 'Rad',
+      IF: 'If',
+      ESPERA: 'Espera',
+      LABEL: 'Label',
+      JUMP: 'Jump',
+    }
+
+    return labels[type]
+  }
+
+  const formatConditionLabel = (kind: ConditionKind): string => {
+    const labels: Record<ConditionKind, string> = {
+      TRUE: 'Siempre',
+      REGISTER_COMPARE: 'Registro operador valor',
+      DAÑO: 'Daño_dir distinto de none',
+      DIR_MOV_EQ: 'Dir_mov igual a dir',
+    }
+
+    return labels[kind]
+  }
+
+  const formatRegisterLabel = (register: NumericRegister): string => {
+    return register === 'RAD' ? 'Rad' : 'Salud'
+  }
+
+  const formatDirectionLabel = (direction: Direction | 'RAD_DIR'): string => {
+    if (direction === 'RAD_DIR') {
+      return 'Rad_dir'
+    }
+
+    if (direction === 'N') {
+      return 'Norte'
+    }
+
+    if (direction === 'S') {
+      return 'Sur'
+    }
+
+    if (direction === 'E') {
+      return 'Este'
+    }
+
+    return 'Oeste'
+  }
+
+  const formatCodePreview = (text: string): string => {
+    return text
+      .replaceAll('COLOCAR_MINA', 'Colocar_mina')
+      .replaceAll('DISPARAR', 'Disparar')
+      .replaceAll('RAD_DIR', 'Rad_dir')
+      .replaceAll('DAÑO_DIR', 'Daño_dir')
+      .replaceAll('DIR_MOV', 'Dir_mov')
+      .replaceAll('MOVER', 'Mover')
+      .replaceAll('BOMBA', 'Bomba')
+      .replaceAll('LABEL', 'Label')
+      .replaceAll('JUMP', 'Jump')
+      .replaceAll('ESPERA', 'Espera')
+      .replaceAll('SALUD', 'Salud')
+      .replaceAll('TRUE', 'True')
+      .replaceAll('NONE', 'None')
+      .replaceAll('RAD', 'Rad')
+      .replaceAll('IF', 'If')
+  }
+
   return (
     <section className={`panel editor-screen ${showProgramTips ? '' : 'tips-hidden'}`}>
       <div className="program-top-bar">
@@ -146,14 +212,14 @@ export function ProgramEditorScreen({
                   <span className="palette-icon">
                     <PixelIcon color={item.logo.color} grid={item.logo.grid} />
                   </span>
-                  <span className="palette-title">{item.type}</span>
+                  <span className="palette-title">{formatCommandTypeLabel(item.type)}</span>
                 </div>
                 <div className="palette-actions">
                   <button
                     className="small-btn palette-add-btn"
                     type="button"
-                    title={`Agregar ${item.type}`}
-                    aria-label={`Agregar ${item.type}`}
+                    title={`Agregar ${formatCommandTypeLabel(item.type)}`}
+                    aria-label={`Agregar ${formatCommandTypeLabel(item.type)}`}
                     onClick={() => addCommandByClick(item.type)}
                   >
                     <PixelIcon color="#064e3b" grid={NAV_ICONS.add} />
@@ -224,28 +290,8 @@ export function ProgramEditorScreen({
                   <div className="row-controls compact-controls">
                     <div className="row-topline">
                       <span className="row-num">{index + 1}</span>
-                      <div className="row-move">
-                        <button
-                          className="small-btn row-move-btn"
-                          type="button"
-                          title="Subir línea"
-                          disabled={index === 0}
-                          onClick={() => moveCommandUp(index)}
-                        >
-                          ↑
-                        </button>
-                        <button
-                          className="small-btn row-move-btn"
-                          type="button"
-                          title="Bajar línea"
-                          disabled={index === currentProgram.length - 1}
-                          onClick={() => moveCommandDown(index, currentProgram.length)}
-                        >
-                          ↓
-                        </button>
-                      </div>
-                      <span className="row-command-chip">{command.type}</span>
-                      <div className="code-preview code-inline">{commandToText(command)}</div>
+                      <span className="row-command-chip">{formatCommandTypeLabel(command.type)}</span>
+                      <div className="code-preview code-inline">{formatCodePreview(commandToText(command))}</div>
                       <button
                         className="small-btn danger row-delete"
                         type="button"
@@ -258,11 +304,14 @@ export function ProgramEditorScreen({
 
                     <div className="row-detailline">
                       {renderProgramField(
-                        'TIPO',
+                        'Tipo',
                         <PixelSelect
                           title="Tipo"
                           value={command.type}
-                          options={COMMAND_LIBRARY.map((item) => ({ value: item.type, label: item.type }))}
+                          options={COMMAND_LIBRARY.map((item) => ({
+                            value: item.type,
+                            label: formatCommandTypeLabel(item.type),
+                          }))}
                           onChange={(selectedType) => {
                             const nextType = selectedType as CommandType
                             patchCommand(index, (next) => {
@@ -283,9 +332,9 @@ export function ProgramEditorScreen({
                         renderProgramField(
                           'DIR',
                           <PixelSelect
-                            title="DIR"
+                            title="Dirección"
                             value={command.dir ?? 'N'}
-                            options={DIRECTIONS.map((dir) => ({ value: dir, label: dir }))}
+                            options={DIRECTIONS.map((dir) => ({ value: dir, label: formatDirectionLabel(dir) }))}
                             onChange={(selectedDir) => {
                               const dir = selectedDir as Direction
                               patchCommand(index, (next) => {
@@ -300,9 +349,12 @@ export function ProgramEditorScreen({
                         renderProgramField(
                           'DIR',
                           <PixelSelect
-                            title="DIR"
+                            title="Dirección"
                             value={command.dirSource === 'RAD_DIR' ? 'RAD_DIR' : command.dir ?? 'N'}
-                            options={SHOOT_DIRECTION_OPTIONS.map((option) => ({ value: option, label: option }))}
+                            options={SHOOT_DIRECTION_OPTIONS.map((option) => ({
+                              value: option,
+                              label: formatDirectionLabel(option),
+                            }))}
                             onChange={(value) => {
                               const selected = value as Direction | 'RAD_DIR'
                               patchCommand(index, (next) => {
@@ -323,9 +375,12 @@ export function ProgramEditorScreen({
                           {renderProgramField(
                             'DIR',
                             <PixelSelect
-                              title="DIR"
+                              title="Dirección"
                               value={command.dirSource === 'RAD_DIR' ? 'RAD_DIR' : command.dir ?? 'N'}
-                              options={SHOOT_DIRECTION_OPTIONS.map((option) => ({ value: option, label: option }))}
+                              options={SHOOT_DIRECTION_OPTIONS.map((option) => ({
+                                value: option,
+                                label: formatDirectionLabel(option),
+                              }))}
                               onChange={(value) => {
                                 const selected = value as Direction | 'RAD_DIR'
                                 patchCommand(index, (next) => {
@@ -342,13 +397,13 @@ export function ProgramEditorScreen({
                           )}
 
                           {renderProgramField(
-                            'DIST',
+                            'Dist',
                             <PixelSelect
                               title="Fuente de DIST"
                               value={bombDistSource}
                               options={DIST_SOURCE_OPTIONS.map((source) => ({
                                 value: source,
-                                label: source === 'RAD' ? '|RAD|' : source,
+                                label: source === 'VAL' ? 'Val' : source === 'RAD' ? '|Rad|' : 'Salud',
                               }))}
                               onChange={(value) => {
                                 const distSource = value as BombDistanceSource
@@ -361,11 +416,11 @@ export function ProgramEditorScreen({
 
                           {bombDistSource === 'VAL' && (
                             renderProgramField(
-                              'VAL',
+                              'Val',
                               <div className="field-inline-control">
                                 <input
                                   className="symbol-input symbol-input-sm"
-                                  title="DIST"
+                                  title="Dist"
                                   type="number"
                                   min={1}
                                   max={config.gridSize}
@@ -382,7 +437,7 @@ export function ProgramEditorScreen({
                                 <button
                                   className="small-btn field-quick-btn"
                                   type="button"
-                                  title="Usar valor absoluto de RAD"
+                                  title="Usar valor absoluto de Rad"
                                   onClick={() => {
                                     patchCommand(index, (next) => {
                                       next.distSource = 'RAD'
@@ -400,15 +455,15 @@ export function ProgramEditorScreen({
 
                       {command.type === 'LABEL' && (
                         renderProgramField(
-                          'LABEL',
+                          'Label',
                           <input
                             className="symbol-input"
                             title="Nombre de la etiqueta"
                             type="text"
-                            value={command.label ?? 'LOOP'}
+                            value={command.label ?? 'Loop'}
                             onChange={(event) => {
                               patchCommand(index, (next) => {
-                                next.label = event.target.value.toUpperCase()
+                                next.label = event.target.value
                               })
                             }}
                           />,
@@ -418,13 +473,13 @@ export function ProgramEditorScreen({
                       {(command.type === 'IF' || command.type === 'JUMP') && (
                         <>
                           {renderProgramField(
-                            'COND',
+                            'Cond',
                             <PixelSelect
                               title="Condición"
                               value={condition.kind}
                               options={CONDITION_OPTIONS.map((option) => ({
                                 value: option.kind,
-                                label: option.label,
+                                label: formatConditionLabel(option.kind),
                               }))}
                               onChange={(value) => {
                                 const kind = value as ConditionKind
@@ -438,13 +493,13 @@ export function ProgramEditorScreen({
                           {condition.kind === 'REGISTER_COMPARE' && (
                             <>
                               {renderProgramField(
-                                'REG',
+                                'Reg',
                                 <PixelSelect
                                   title="Registro"
                                   value={condition.register ?? 'RAD'}
                                   options={REGISTER_OPTIONS.map((register) => ({
                                     value: register,
-                                    label: register,
+                                    label: formatRegisterLabel(register),
                                   }))}
                                   onChange={(value) => {
                                     const register = value as NumericRegister
@@ -462,7 +517,7 @@ export function ProgramEditorScreen({
                               )}
 
                               {renderProgramField(
-                                'OP',
+                                'Op',
                                 <PixelSelect
                                   title="Operador"
                                   value={condition.operator ?? '>'}
@@ -486,7 +541,7 @@ export function ProgramEditorScreen({
                               )}
 
                               {renderProgramField(
-                                'VAL',
+                                'Val',
                                 <input
                                   className="symbol-input symbol-input-sm"
                                   title="Valor"
@@ -513,11 +568,11 @@ export function ProgramEditorScreen({
 
                           {condition.kind === 'DIR_MOV_EQ' && (
                             renderProgramField(
-                              'DIRC',
+                              'Dirc',
                               <PixelSelect
-                                title="DIR"
+                                title="Dirección"
                                 value={condition.dir ?? 'N'}
-                                options={DIRECTIONS.map((dir) => ({ value: dir, label: dir }))}
+                                options={DIRECTIONS.map((dir) => ({ value: dir, label: formatDirectionLabel(dir) }))}
                                 onChange={(value) => {
                                   const dir = value as Direction
                                   patchCommand(index, (next) => {
@@ -538,15 +593,15 @@ export function ProgramEditorScreen({
 
                       {command.type === 'JUMP' && (
                         renderProgramField(
-                          'LABEL',
+                          'Label',
                           <input
                             className="symbol-input"
-                            title="Línea o LABEL a saltar"
+                            title="Línea o etiqueta a saltar"
                             type="text"
-                            value={command.label ?? 'LOOP'}
+                            value={command.label ?? 'Loop'}
                             onChange={(event) => {
                               patchCommand(index, (next) => {
-                                next.label = event.target.value.toUpperCase()
+                                next.label = event.target.value
                               })
                             }}
                           />,
@@ -555,9 +610,9 @@ export function ProgramEditorScreen({
                     </div>
 
                     {closesPreviousIf && (
-                      <div className="if-end-marker" aria-label="ENDIF automático">
+                      <div className="if-end-marker" aria-label="Fin if automático">
                         <span className="if-end-line" />
-                        <span>ENDIF</span>
+                        <span>Fin if</span>
                       </div>
                     )}
                   </div>

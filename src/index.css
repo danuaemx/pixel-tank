@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-  font-family: 'Press Start 2P', system-ui, monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Source Code Pro', monospace;
   font-size: 13px;
   line-height: 1.4;
   color: #f8fafc;
   background: #1e293b;
   font-synthesis: none;
-  text-rendering: geometricPrecision;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {

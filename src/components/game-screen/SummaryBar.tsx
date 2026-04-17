@@ -57,16 +57,16 @@ export function SummaryBar({
         <div className="summary-actions">
           <button
             className="pixel-btn top-control-btn"
-            title={running ? 'Pausar simulación' : 'Continuar simulación'}
-            aria-label={running ? 'Pausar simulación' : 'Continuar simulación'}
+            title={running ? 'Modo automático (clic para pasar a paso a paso)' : 'Modo paso a paso (clic para continuar automático)'}
+            aria-label={running ? 'Modo automático activo' : 'Modo paso a paso activo'}
             disabled={gameState.finished}
             onClick={onToggleRunning}
           >
-            <PixelIcon color="#064e3b" grid={running ? CONTROL_ICONS.pause : CONTROL_ICONS.play} />
+            <PixelIcon color="#064e3b" grid={running ? CONTROL_ICONS.auto : CONTROL_ICONS.manual} />
           </button>
           <button
             className="pixel-btn top-control-btn"
-            title="Ejecutar un paso"
+            title="Ejecutar un paso (avance manual)"
             aria-label="Ejecutar un paso"
             disabled={running || gameState.finished}
             onClick={onRunSingleStep}
@@ -76,10 +76,11 @@ export function SummaryBar({
           <button className="pixel-btn top-control-btn" title="Reiniciar simulación" aria-label="Reiniciar simulación" onClick={onRestart}>
             <PixelIcon color="#064e3b" grid={CONTROL_ICONS.restart} />
           </button>
-          <button className="pixel-btn top-control-btn" title="Volver al menú" aria-label="Volver al menú" onClick={onBackToMenu}>
+          <button className="pixel-btn top-control-btn" title="Volver al menú principal" aria-label="Volver al menú principal" onClick={onBackToMenu}>
             <PixelIcon color="#064e3b" grid={CONTROL_ICONS.menu} />
           </button>
           <div className="speed-control-top" title={`Velocidad: ${speedPercent}% (${gameState.config.tickMs}ms)`}>
+            <span className="speed-control-label">Velocidad</span>
             <span className="speed-control-icon" aria-hidden="true">
               <PixelIcon color="#fcd34d" grid={CONTROL_ICONS.speed} />
             </span>
@@ -93,11 +94,11 @@ export function SummaryBar({
               onChange={(nextSpeedValue) => onTickMsChange(maxTickMs + minTickMs - nextSpeedValue)}
             />
           </div>
-          <label className="tips-toggle game-passive-toggle" title="Animar ejecución de líneas pasivas">
+          <label className="tips-toggle game-passive-toggle" title="Mostrar detalle de ejecución">
             <input
               type="checkbox"
               checked={animatePassiveLines}
-              aria-label="Animar líneas pasivas"
+              aria-label="Mostrar detalle de ejecución"
               onChange={(event) => onAnimatePassiveLinesChange(event.target.checked)}
             />
             <span className="tips-toggle-track">
@@ -106,6 +107,7 @@ export function SummaryBar({
             <span className="tips-toggle-icon">
               <PixelIcon color={animatePassiveLines ? '#fcd34d' : '#94a3b8'} grid={CONTROL_ICONS.passive} />
             </span>
+            <span className="toggle-caption">Detalle</span>
           </label>
         </div>
       </div>

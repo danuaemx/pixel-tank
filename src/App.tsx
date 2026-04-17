@@ -412,22 +412,6 @@ function App() {
     })
   }
 
-  const moveCommandUp = (index: number): void => {
-    if (index <= 0) {
-      return
-    }
-
-    moveCommand(index, index - 1)
-  }
-
-  const moveCommandDown = (index: number, total: number): void => {
-    if (index >= total - 1) {
-      return
-    }
-
-    moveCommand(index, index + 2)
-  }
-
   const handleDropAt = (index: number): void => {
     if (!dragPayload) {
       return
@@ -605,8 +589,6 @@ function App() {
         setSelectedTank={setSelectedTank}
         setDragPayload={setDragPayload}
         addCommandByClick={addCommandByClick}
-        moveCommandUp={moveCommandUp}
-        moveCommandDown={moveCommandDown}
         removeCommand={removeCommand}
         handleDropAt={handleDropAt}
         patchCommand={patchCommand}

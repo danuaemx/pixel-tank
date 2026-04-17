@@ -4,6 +4,26 @@ import { COMMAND_LOGOS, SCORE_STAT_ICONS } from './_const'
 import { getActiveLine } from './helpers'
 import type { SidebarProps } from './types'
 
+function formatExecutionText(text: string): string {
+  return text
+    .replaceAll('COLOCAR_MINA', 'Colocar_mina')
+    .replaceAll('DISPARAR', 'Disparar')
+    .replaceAll('RAD_DIR', 'Rad_dir')
+    .replaceAll('DAÑO_DIR', 'Daño_dir')
+    .replaceAll('DANO_DIR', 'Dano_dir')
+    .replaceAll('DIR_MOV', 'Dir_mov')
+    .replaceAll('MOVER', 'Mover')
+    .replaceAll('BOMBA', 'Bomba')
+    .replaceAll('LABEL', 'Label')
+    .replaceAll('JUMP', 'Jump')
+    .replaceAll('ESPERA', 'Espera')
+    .replaceAll('SALUD', 'Salud')
+    .replaceAll('TRUE', 'True')
+    .replaceAll('NONE', 'None')
+    .replaceAll('RAD', 'Rad')
+    .replaceAll('IF', 'If')
+}
+
 export function Sidebar({ gameState, animatePassiveLines, animatedLineByTankId }: SidebarProps) {
   return (
     <div className="game-sidebar panel">
@@ -12,7 +32,7 @@ export function Sidebar({ gameState, animatePassiveLines, animatedLineByTankId }
           <h3>Eventos</h3>
           <ul>
             {gameState.log.slice(0, 16).map((entry, index) => (
-              <li key={`${entry}-${index}`}>{entry}</li>
+              <li key={`${entry}-${index}`}>{formatExecutionText(entry)}</li>
             ))}
           </ul>
         </div>
@@ -33,7 +53,7 @@ export function Sidebar({ gameState, animatePassiveLines, animatedLineByTankId }
                   <span className="dot" style={{ backgroundColor: tank.color }} />
                   <strong>{tank.name}</strong>
                   {isActingTank && actionLogo && (
-                    <span className="score-action-logo" title={tank.lastAction}>
+                    <span className="score-action-logo" title={formatExecutionText(tank.lastAction)}>
                       <PixelIcon color={actionLogo.color} grid={actionLogo.grid} />
                     </span>
                   )}
@@ -84,7 +104,7 @@ export function Sidebar({ gameState, animatePassiveLines, animatedLineByTankId }
                         if (!show) return null
                         return (
                           <div key={idx} className={`terminal-line ${idx === activeLine ? 'active' : ''}`}>
-                            <span className="line-num">{idx + 1}</span> {commandToText(cmd)}
+                            <span className="line-num">{idx + 1}</span> {formatExecutionText(commandToText(cmd))}
                           </div>
                         )
                       })
