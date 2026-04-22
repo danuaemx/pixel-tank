@@ -33,6 +33,8 @@ import {
   MIN_MAX_ROUNDS,
   MIN_MINES_PER_TANK,
   normalizeProgramsForPlayers,
+  parseProgramsFromText,
+  serializeProgramsToText,
   type Command,
   type CommandType,
   type Condition,
@@ -345,6 +347,34 @@ function App() {
     chiptuneAudio.startMusic(gameMusicTheme)
   }
 
+  const exportProgramsToText = (): void => {
+    const selectedProgram = programs[selectedTank] ?? []
+    const text = serializeProgramsToText([selectedProgram], 1)
+    const fileBlob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+    const downloadUrl = window.URL.createObjectURL(fileBlob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = `tanque-${selectedTank + 1}.txt`
+    link.click()
+    window.URL.revokeObjectURL(downloadUrl)
+  }
+
+  const importProgramsFromText = (text: string): void => {
+    try {
+      const parsed = parseProgramsFromText(text, 1)
+      const nextProgram = parsed.programs[0] ?? []
+
+      setPrograms((previous) => {
+        const next = previous.map((program) => [...program])
+        next[selectedTank] = nextProgram
+        return next
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo importar el archivo.'
+      window.alert(message)
+    }
+  }
+
   // Edición del programa seleccionado.
   const updateSelectedProgram = (updater: (program: Command[]) => Command[]): void => {
     setPrograms((previous) => {
@@ -595,6 +625,8 @@ function App() {
         getCondition={getCondition}
         getIfDependencyDepth={getIfDependencyDepth}
         renderProgramField={renderProgramField}
+        onExportPrograms={exportProgramsToText}
+        onImportPrograms={importProgramsFromText}
         onBackToConfig={() => setScreen('config')}
         onStartSimulation={() => startSimulation(false)}
         onBackToMenu={() => askReturnToMenu('program')}

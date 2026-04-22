@@ -4,7 +4,6 @@ import {
   clamp,
   createId,
   evaluateCondition,
-  getLabelMap,
   getMineAt,
   getStationAt,
   getTankAt,
@@ -430,7 +429,6 @@ function executeTankTurn(state: GameState, tankIndex: number): void {
     return
   }
 
-  const labelMap = getLabelMap(program)
   let passiveCount = 0
   let didAction = false
   let safetyCounter = 0
@@ -452,11 +450,6 @@ function executeTankTurn(state: GameState, tankIndex: number): void {
     tank.lastCommandType = command.type
 
     switch (command.type) {
-      case 'LABEL': {
-        tank.ip = nextIndex(tank.ip, program.length, 1)
-        passiveCount += 1
-        break
-      }
       case 'RAD': {
         const dir = command.dir ?? 'N'
         tank.registers.RAD = getRadReading(state, tank, dir)
@@ -468,17 +461,6 @@ function executeTankTurn(state: GameState, tankIndex: number): void {
       case 'IF': {
         const conditionResult = evaluateCondition(command.condition, tank)
         tank.ip = nextIndex(tank.ip, program.length, conditionResult ? 1 : 2)
-        passiveCount += 1
-        break
-      }
-      case 'JUMP': {
-        const conditionResult = evaluateCondition(command.condition, tank)
-        if (conditionResult && command.label) {
-          const jumpTarget = labelMap.get(command.label.trim().toUpperCase())
-          tank.ip = jumpTarget ?? nextIndex(tank.ip, program.length, 1)
-        } else {
-          tank.ip = nextIndex(tank.ip, program.length, 1)
-        }
         passiveCount += 1
         break
       }

@@ -16,7 +16,7 @@ export function TutorialScreen({ onBackToMenu }: TutorialScreenProps) {
         </li>
         <li>
           <span className="tutorial-item-icon"><PixelIcon color="#f87171" grid={[' ### ', '#####', ' # # ', ' # # ', '  #  ', '  #  ', '  #  ']} /></span>
-          <strong>Disparar(dir)</strong>: daño instantáneo de -20, alcance según tablero. También acepta <strong>Disparar(rad_dir)</strong>.
+          <strong>Disparar(dir)</strong>: daño instantáneo de -20, alcance según tablero. También acepta <strong>Disparar(radar_dir)</strong>.
         </li>
         <li>
           <span className="tutorial-item-icon"><PixelIcon color="#facc15" grid={['  #  ', ' ### ', '#####', ' ### ', '  #  ']} /></span>
@@ -24,26 +24,22 @@ export function TutorialScreen({ onBackToMenu }: TutorialScreenProps) {
         </li>
         <li>
           <span className="tutorial-item-icon"><PixelIcon color="#ef4444" grid={['#   #', ' # # ', '  #  ', ' ### ', '#####', ' ### ', '  #  ']} /></span>
-          <strong>Bomba(dir,dist)</strong>: 2 por tanque, área 3x3 (-30) y residual alrededor (-15). Dir puede ser N/S/E/O o Rad_dir, y Dist puede ser Val, |Rad| o Salud.
+          <strong>Bomba(dir,dist)</strong>: 2 por tanque, área 3x3 (-30) y residual alrededor (-15). Dir puede ser N/S/E/O o Radar_dir, y Dist puede ser Val, |Radar| o Salud.
         </li>
         <li>
           <span className="tutorial-item-icon"><PixelIcon color="#4ade80" grid={['  #  ', ' # # ', '#   #', '  #  ', '  #  ', '  #  ', ' ### ']} /></span>
-          <strong>Rad(dir)</strong>: guarda Rad con -d si hay tanque/obstáculo/mina, +d si hay estación, y actualiza Rad_dir con la última dirección leída.
+          <strong>Radar(dir)</strong>: guarda Radar con -d si hay tanque/obstáculo/mina, +d si hay estación, y actualiza Radar_dir con la última dirección leída.
         </li>
         <li>
           <span className="tutorial-item-icon"><PixelIcon color="#a78bfa" grid={[' ### ', '#   #', '   # ', '  #  ', '     ', '  #  ', '  #  ']} /></span>
           <strong>If(cond)</strong>: si falla, salta la siguiente línea. Cond usa operadores &lt;=, &lt;, &gt;, &gt;=, ==.
         </li>
-        <li>
-          <span className="tutorial-item-icon"><PixelIcon color="#fb923c" grid={[' ### ', '#   #', '    #', '  ## ', ' #   ', '#### ']} /></span>
-          <strong>Label</strong> y <strong>Jump[cond,label]</strong>: controlan bucles y saltos con la misma condición de If.
-        </li>
       </ul>
 
       <h3>Registros</h3>
       <ul className="tutorial-list">
-        <li><span className="tutorial-item-icon"><PixelIcon color="#34d399" grid={['#####', '#   #', '### #', '#   #', '#####']} /></span><strong>Rad</strong>: radar en la dirección leída. -d si detecta tanque/obstáculo/mina, +d si detecta estación, 0 si no detecta.</li>
-        <li><span className="tutorial-item-icon"><PixelIcon color="#22d3ee" grid={[' ### ', '#   #', '# # #', '#   #', ' ### ']} /></span><strong>Rad_dir</strong>: última dirección usada por Rad. Se puede reutilizar en Disparar(rad_dir).</li>
+        <li><span className="tutorial-item-icon"><PixelIcon color="#34d399" grid={['#####', '#   #', '### #', '#   #', '#####']} /></span><strong>Radar</strong>: radar en la dirección leída. -d si detecta tanque/obstáculo/mina, +d si detecta estación, 0 si no detecta.</li>
+        <li><span className="tutorial-item-icon"><PixelIcon color="#22d3ee" grid={[' ### ', '#   #', '# # #', '#   #', ' ### ']} /></span><strong>Radar_dir</strong>: última dirección usada por Radar. Se puede reutilizar en Disparar(Radar_dir).</li>
         <li><span className="tutorial-item-icon"><PixelIcon color="#f87171" grid={['#   #', '## ##', '# # #', '#   #', '#   #']} /></span><strong>Dano_dir</strong>: dirección desde la que recibió daño en el turno previo (sirve para saltar a huida).</li>
         <li><span className="tutorial-item-icon"><PixelIcon color="#60a5fa" grid={['#   #', '## ##', '# # #', '#   #', ' ### ']} /></span><strong>Dir_mov</strong>: última dirección usada en Mover.</li>
         <li><span className="tutorial-item-icon"><PixelIcon color="#fcd34d" grid={[' ### ', '#   #', '#   #', '#   #', ' ### ']} /></span><strong>Salud</strong>: vida actual del tanque (0 a 100).</li>

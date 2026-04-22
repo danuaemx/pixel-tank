@@ -8,19 +8,17 @@ function formatExecutionText(text: string): string {
   return text
     .replaceAll('COLOCAR_MINA', 'Colocar_mina')
     .replaceAll('DISPARAR', 'Disparar')
-    .replaceAll('RAD_DIR', 'Rad_dir')
+    .replaceAll('RAD_DIR', 'Radar_dir')
     .replaceAll('DAÑO_DIR', 'Daño_dir')
     .replaceAll('DANO_DIR', 'Dano_dir')
     .replaceAll('DIR_MOV', 'Dir_mov')
     .replaceAll('MOVER', 'Mover')
     .replaceAll('BOMBA', 'Bomba')
-    .replaceAll('LABEL', 'Label')
-    .replaceAll('JUMP', 'Jump')
     .replaceAll('ESPERA', 'Espera')
     .replaceAll('SALUD', 'Salud')
     .replaceAll('TRUE', 'True')
     .replaceAll('NONE', 'None')
-    .replaceAll('RAD', 'Rad')
+    .replaceAll('RAD', 'Radar')
     .replaceAll('IF', 'If')
 }
 

@@ -96,22 +96,6 @@ export const COMMAND_LIBRARY: CommandLibraryItem[] = [
       grid: ['#####', ' # # ', '  #  ', ' # # ', '#####'],
     },
   },
-  {
-    type: 'LABEL',
-    desc: 'Marca salto.',
-    logo: {
-      color: '#f472b6',
-      grid: ['#### ', '#   #', '#### ', '#    ', '#    '],
-    },
-  },
-  {
-    type: 'JUMP',
-    desc: 'Ir a LABEL.',
-    logo: {
-      color: '#fb923c',
-      grid: [' ### ', '#   #', '    #', '  ## ', ' #   ', '#### '],
-    },
-  },
 ]
 
 export const CONDITION_OPTIONS: Array<{ kind: ConditionKind; label: string }> = [

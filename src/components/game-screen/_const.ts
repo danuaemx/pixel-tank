@@ -51,14 +51,6 @@ export const COMMAND_LOGOS: Record<CommandType, PixelLogo> = {
     color: '#94a3b8',
     grid: ['#####', ' # # ', '  #  ', ' # # ', '#####'],
   },
-  LABEL: {
-    color: '#f472b6',
-    grid: ['#### ', '#   #', '#### ', '#    ', '#    '],
-  },
-  JUMP: {
-    color: '#fb923c',
-    grid: [' ### ', '#   #', '    #', '  ## ', ' #   ', '#### '],
-  },
 }
 
 export const SCORE_STAT_ICONS = {
