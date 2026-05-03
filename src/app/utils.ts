@@ -12,6 +12,11 @@ import {
 } from './_const'
 import type { MenuConfirmSource } from './types'
 
+export function getPublicAssetUrl(path: string): string {
+  const normalizedPath = path.startsWith('/') ? path.slice(1) : path
+  return `${import.meta.env.BASE_URL}${normalizedPath}`
+}
+
 export function sanitizeUiFontSize(value: number): number {
   if (!Number.isFinite(value)) {
     return DEFAULT_UI_FONT_SIZE

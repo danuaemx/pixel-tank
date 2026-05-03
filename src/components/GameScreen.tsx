@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { getPublicAssetUrl } from '../app/utils'
 import { getDisplayScore } from '../game'
 import { BoardView } from './game-screen/BoardView'
 import { Sidebar } from './game-screen/Sidebar'
@@ -128,7 +129,7 @@ export function GameScreen({
       {gameState.finished && (
         <div className="result-box">
           <h3 className="result-title">
-            <img src="/effects/trophy.svg" alt="" aria-hidden="true" />
+            <img src={getPublicAssetUrl('effects/trophy.svg')} alt="" aria-hidden="true" />
             <span>Resultado final</span>
           </h3>
           <ol>

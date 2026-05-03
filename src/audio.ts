@@ -1,16 +1,17 @@
 import type { SoundKey } from './game'
+import { getPublicAssetUrl } from './app/utils'
 
 export type UiSoundKey = 'ui-nav' | 'ui-action' | 'ui-step' | 'ui-toggle' | 'ui-danger'
 export type MusicTheme = 'menu' | 'screens' | 'program' | 'game' | 'quick' | 'victory' | 'winner'
 
 const MUSIC_TRACKS: Record<MusicTheme, string> = {
-  menu: '/music/Menu.mp3',
-  screens: '/music/otras_pantallas.mp3',
-  program: '/music/programar_sad.mp3',
-  game: '/music/jugar_1.mp3',
-  quick: '/music/jugar_2.mp3',
-  victory: '/music/jugar_3.mp3',
-  winner: '/music/programar_happy_ganar.mp3',
+  menu: getPublicAssetUrl('music/Menu.mp3'),
+  screens: getPublicAssetUrl('music/otras_pantallas.mp3'),
+  program: getPublicAssetUrl('music/programar_sad.mp3'),
+  game: getPublicAssetUrl('music/jugar_1.mp3'),
+  quick: getPublicAssetUrl('music/jugar_2.mp3'),
+  victory: getPublicAssetUrl('music/jugar_3.mp3'),
+  winner: getPublicAssetUrl('music/programar_happy_ganar.mp3'),
 }
 
 class ChiptuneAudio {

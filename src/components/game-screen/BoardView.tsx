@@ -1,4 +1,5 @@
 import { cellKey } from '../../game'
+import { getPublicAssetUrl } from '../../app/utils'
 import { PixelIcon } from '../PixelIcon'
 import { COMMAND_LOGOS } from './_const'
 import { getTankDirection } from './helpers'
@@ -24,13 +25,13 @@ export function BoardView({ gameState, boardInfo }: BoardProps) {
           if (effects?.has('move')) classes.push('fx-move')
           if (effects?.has('shot')) classes.push('fx-shot')
           const explosionSvg = effects?.has('explosion-bomb')
-            ? '/effects/explosion-bomb.svg'
+            ? getPublicAssetUrl('effects/explosion-bomb.svg')
             : effects?.has('explosion-mine')
-              ? '/effects/explosion-mine.svg'
+              ? getPublicAssetUrl('effects/explosion-mine.svg')
               : effects?.has('explosion-shot')
-                ? '/effects/explosion-shot.svg'
+                ? getPublicAssetUrl('effects/explosion-shot.svg')
                 : effects?.has('explosion')
-                  ? '/effects/explosion-impact.svg'
+                  ? getPublicAssetUrl('effects/explosion-impact.svg')
                   : null
           if (explosionSvg) classes.push('fx-explosion')
           if (effects?.has('heal')) classes.push('fx-heal')
@@ -47,7 +48,7 @@ export function BoardView({ gameState, boardInfo }: BoardProps) {
               {boardInfo.stationMap.has(key) && <div className="tile-station" aria-label="Estación de salud" />}
               {boardInfo.mineMap.has(key) && (
                 <div className="tile-mine">
-                  <img src="/effects/mine-advanced.svg" alt="" aria-hidden="true" />
+                  <img src={getPublicAssetUrl('effects/mine-advanced.svg')} alt="" aria-hidden="true" />
                 </div>
               )}
               {tank && (
