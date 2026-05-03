@@ -10,6 +10,7 @@ import {
   MIN_UI_FONT_SIZE,
   NAV_ICONS,
 } from '../_const'
+import { formatMasterVolumeDisplay } from '../utils'
 import {
   MAX_BOMBS_PER_TANK,
   MAX_GRID_SIZE,
@@ -180,7 +181,7 @@ export function ConfigScreen({
           <label className="font-size-setting">
             <div className="font-size-header">
               <span>Volumen base</span>
-              <strong>{masterVolume}%</strong>
+              <strong>{formatMasterVolumeDisplay(masterVolume)}%</strong>
             </div>
             <PixelRange
               className="config-range-control"

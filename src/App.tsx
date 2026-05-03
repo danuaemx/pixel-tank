@@ -107,7 +107,7 @@ function App() {
     }
 
     if (screen === 'game' && gameState?.finished) {
-      return 'victory'
+      return 'winner'
     }
 
     return gameMusicTheme

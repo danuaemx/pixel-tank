@@ -4,6 +4,8 @@ import {
   DEFAULT_MASTER_VOLUME,
   DEFAULT_UI_FONT_SIZE,
   MAX_MASTER_VOLUME,
+  MASTER_VOLUME_DISPLAY_MAX,
+  MASTER_VOLUME_DISPLAY_REFERENCE,
   MAX_UI_FONT_SIZE,
   MIN_MASTER_VOLUME,
   MIN_UI_FONT_SIZE,
@@ -24,6 +26,14 @@ export function sanitizeMasterVolume(value: number): number {
   }
 
   return Math.min(MAX_MASTER_VOLUME, Math.max(MIN_MASTER_VOLUME, Math.round(value)))
+}
+
+export function formatMasterVolumeDisplay(value: number): number {
+  if (!Number.isFinite(value)) {
+    return 0
+  }
+
+  return Math.round((value * MASTER_VOLUME_DISPLAY_MAX) / MASTER_VOLUME_DISPLAY_REFERENCE)
 }
 
 export function getUiSoundForButton(button: HTMLButtonElement): UiSoundKey {

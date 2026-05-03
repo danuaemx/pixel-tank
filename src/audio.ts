@@ -1,7 +1,7 @@
 import type { SoundKey } from './game'
 
 export type UiSoundKey = 'ui-nav' | 'ui-action' | 'ui-step' | 'ui-toggle' | 'ui-danger'
-export type MusicTheme = 'menu' | 'screens' | 'program' | 'game' | 'quick' | 'victory'
+export type MusicTheme = 'menu' | 'screens' | 'program' | 'game' | 'quick' | 'victory' | 'winner'
 
 const MUSIC_TRACKS: Record<MusicTheme, string> = {
   menu: '/music/Menu.mp3',
@@ -10,6 +10,7 @@ const MUSIC_TRACKS: Record<MusicTheme, string> = {
   game: '/music/jugar_1.mp3',
   quick: '/music/jugar_2.mp3',
   victory: '/music/jugar_3.mp3',
+  winner: '/music/programar_happy_ganar.mp3',
 }
 
 class ChiptuneAudio {
@@ -32,6 +33,8 @@ class ChiptuneAudio {
   private readonly musicFadeSeconds = 0.05
 
   private readonly musicLeadSeconds = 0.05
+
+  private readonly musicVolumeScale = 60 / 315
 
   private clampGain(value: number): number {
     return Math.min(0.7, Math.max(0.0001, value))
@@ -193,7 +196,7 @@ class ChiptuneAudio {
   }
 
   private getMusicVolume(): number {
-    return Math.min(1, Math.max(0, this.masterVolume * 0.22))
+    return Math.min(1, Math.max(0, this.masterVolume * this.musicVolumeScale))
   }
 
   private createMusicElement(theme: MusicTheme): HTMLAudioElement {

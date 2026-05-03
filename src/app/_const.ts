@@ -8,13 +8,15 @@ import type {
   NumericRegister,
 } from '../game'
 
-export const DEFAULT_UI_FONT_SIZE = 17
+export const DEFAULT_UI_FONT_SIZE = 18
 export const MIN_UI_FONT_SIZE = 5
 export const MAX_UI_FONT_SIZE = 24
 
 export const DEFAULT_MASTER_VOLUME = 170
 export const MIN_MASTER_VOLUME = 30
 export const MAX_MASTER_VOLUME = 320
+export const MASTER_VOLUME_DISPLAY_REFERENCE = 315
+export const MASTER_VOLUME_DISPLAY_MAX = 60
 
 export const NAV_ICONS = {
   quick: ['#    ', '##   ', '###  ', '##   ', '#    '],
