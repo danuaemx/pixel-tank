@@ -6,13 +6,14 @@ type MenuScreenProps = {
   onOpenConfig: () => void
   onOpenProgram: () => void
   onOpenTutorial: () => void
+  onOpenCredits: () => void
 }
 
-export function MenuScreen({ onQuickStart, onOpenConfig, onOpenProgram, onOpenTutorial }: MenuScreenProps) {
+export function MenuScreen({ onQuickStart, onOpenConfig, onOpenProgram, onOpenTutorial, onOpenCredits }: MenuScreenProps) {
   return (
     <section className="panel menu-screen">
       <div className="hero-banner">
-        <h1 className="retro-title">PIXEL TANKS</h1>
+        <h1 className="retro-title">Pixel Tanks</h1>
       </div>
       <p className="subtitle">Observa y Programa la batalla automática de tanques.</p>
       <div className="menu-actions">
@@ -31,6 +32,10 @@ export function MenuScreen({ onQuickStart, onOpenConfig, onOpenProgram, onOpenTu
         <button className="pixel-btn btn-large btn-with-icon" onClick={onOpenTutorial}>
           <span className="btn-icon"><PixelIcon color="#064e3b" grid={NAV_ICONS.tutorial} /></span>
           <span>Tutorial</span>
+        </button>
+        <button className="pixel-btn btn-large btn-with-icon" onClick={onOpenCredits}>
+          <span className="btn-icon"><PixelIcon color="#064e3b" grid={NAV_ICONS.credits} /></span>
+          <span>Créditos</span>
         </button>
       </div>
     </section>

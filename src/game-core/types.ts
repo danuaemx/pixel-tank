@@ -11,8 +11,6 @@ export type CommandType =
   | 'RAD'
   | 'IF'
   | 'ESPERA'
-  | 'LABEL'
-  | 'JUMP'
 
 export type NumericRegister = 'RAD' | 'SALUD'
 export type CompareOperator = '<=' | '<' | '>' | '>=' | '=='
@@ -50,7 +48,6 @@ export interface Command {
   dirSource?: ShootDirectionSource
   dist?: number
   distSource?: BombDistanceSource
-  label?: string
   condition?: Condition
 }
 

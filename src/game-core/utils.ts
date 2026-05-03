@@ -122,19 +122,6 @@ export function evaluateCondition(condition: Condition | undefined, tank: Tank):
   }
 }
 
-export function getLabelMap(program: Command[]): Map<string, number> {
-  const labelMap = new Map<string, number>()
-
-  program.forEach((command, index) => {
-    if (command.type === 'LABEL' && command.label) {
-      // Normalizamos etiquetas para que los saltos no dependan de mayúsculas, espacios o formato de entrada.
-      labelMap.set(command.label.trim().toUpperCase(), index)
-    }
-  })
-
-  return labelMap
-}
-
 export function pickRandomFreeCell(size: number, occupied: Set<string>): { x: number; y: number } | null {
   const freeCells: string[] = []
 

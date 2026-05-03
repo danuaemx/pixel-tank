@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import {
   commandToText,
   createCommandTemplate,
@@ -39,14 +40,15 @@ type ProgramEditorScreenProps = {
   setSelectedTank: (index: number) => void
   setDragPayload: (payload: DragPayload | null) => void
   addCommandByClick: (type: CommandType) => void
-  moveCommandUp: (index: number) => void
-  moveCommandDown: (index: number, total: number) => void
   removeCommand: (index: number) => void
   handleDropAt: (index: number) => void
   patchCommand: (index: number, updater: (command: Command) => void) => void
   getCondition: (command: Command) => Condition
   getIfDependencyDepth: (program: Command[], index: number) => number
   renderProgramField: (label: string, control: React.ReactNode, className?: string) => React.ReactNode
+  onExportPrograms: () => void
+  onImportPrograms: (text: string) => void
+  onClearProgram: () => void
   onBackToConfig: () => void
   onStartSimulation: () => void
   onBackToMenu: () => void
@@ -64,18 +66,91 @@ export function ProgramEditorScreen({
   setSelectedTank,
   setDragPayload,
   addCommandByClick,
-  moveCommandUp,
-  moveCommandDown,
   removeCommand,
   handleDropAt,
   patchCommand,
   getCondition,
   getIfDependencyDepth,
   renderProgramField,
+  onExportPrograms,
+  onImportPrograms,
+  onClearProgram,
   onBackToConfig,
   onStartSimulation,
   onBackToMenu,
 }: ProgramEditorScreenProps) {
+  const importInputRef = useRef<HTMLInputElement | null>(null)
+
+  const formatCommandTypeLabel = (type: CommandType): string => {
+    const labels: Record<CommandType, string> = {
+      MOVER: 'Mover',
+      DISPARAR: 'Disparar',
+      COLOCAR_MINA: 'Colocar_mina',
+      BOMBA: 'Bomba',
+      RAD: 'Radar',
+      IF: 'If',
+      ESPERA: 'Espera',
+    }
+
+    return labels[type]
+  }
+
+  const formatConditionLabel = (kind: ConditionKind): string => {
+    const labels: Record<ConditionKind, string> = {
+      TRUE: 'Siempre',
+      REGISTER_COMPARE: 'Registro operador valor',
+      DAÑO: 'Daño_dir distinto de none',
+      DIR_MOV_EQ: 'Dir_mov igual a dir',
+    }
+
+    return labels[kind]
+  }
+
+  const formatRegisterLabel = (register: NumericRegister): string => {
+    return register === 'RAD' ? 'Radar' : 'Salud'
+  }
+
+  const formatDirectionLabel = (direction: Direction | 'RAD_DIR'): string => {
+    if (direction === 'RAD_DIR') {
+      return 'Radar_dir'
+    }
+
+    if (direction === 'N') {
+      return 'Norte'
+    }
+
+    if (direction === 'S') {
+      return 'Sur'
+    }
+
+    if (direction === 'E') {
+      return 'Este'
+    }
+
+    return 'Oeste'
+  }
+
+  const formatCodePreview = (text: string): string => {
+    return text
+      .replaceAll('COLOCAR_MINA', 'Colocar_mina')
+      .replaceAll('DISPARAR', 'Disparar')
+      .replaceAll('RAD_DIR', 'Radar_dir')
+      .replaceAll('DAÑO_DIR', 'Daño_dir')
+      .replaceAll('DIR_MOV', 'Dir_mov')
+      .replaceAll('MOVER', 'Mover')
+      .replaceAll('BOMBA', 'Bomba')
+      .replaceAll('ESPERA', 'Espera')
+      .replaceAll('SALUD', 'Salud')
+      .replaceAll('TRUE', 'True')
+      .replaceAll('NONE', 'None')
+      .replaceAll('RAD', 'Radar')
+      .replaceAll('IF', 'If')
+  }
+
+  const triggerImport = (): void => {
+    importInputRef.current?.click()
+  }
+
   return (
     <section className={`panel editor-screen ${showProgramTips ? '' : 'tips-hidden'}`}>
       <div className="program-top-bar">
@@ -85,14 +160,64 @@ export function ProgramEditorScreen({
           <div className="program-top-actions">
             <button className="pixel-btn program-icon-btn" title="Volver a configuración" aria-label="Volver a configuración" onClick={onBackToConfig}>
               <PixelIcon color="#064e3b" grid={NAV_ICONS.back} />
+              <span className="program-icon-label">Config</span>
             </button>
-            <button className="pixel-btn program-icon-btn" title="Iniciar simulación" aria-label="Iniciar simulación" onClick={onStartSimulation}>
+            <button
+              className="pixel-btn danger btn-with-icon"
+              type="button"
+              title="Limpiar solo este tanque"
+              aria-label="Limpiar solo este tanque"
+              onClick={onClearProgram}
+            >
+              <span className="btn-icon">
+                <PixelIcon color="#ffffff" grid={NAV_ICONS.cancel} />
+              </span>
+              Limpiar
+            </button>
+            <button className="small-btn btn-with-icon" type="button" title="Guardar tanque en TXT" aria-label="Guardar tanque en TXT" onClick={onExportPrograms}>
+              <span className="btn-icon">
+                <PixelIcon color="#1f2937" grid={NAV_ICONS.save} />
+              </span>
+              Guardar
+            </button>
+            <button className="small-btn btn-with-icon" type="button" title="Cargar tanque desde TXT" aria-label="Cargar tanque desde TXT" onClick={triggerImport}>
+              <span className="btn-icon">
+                <PixelIcon color="#1f2937" grid={NAV_ICONS.load} />
+              </span>
+              Cargar
+            </button>
+            <button className="pixel-btn program-icon-btn program-start-btn" title="Iniciar simulación" aria-label="Iniciar simulación" onClick={onStartSimulation}>
               <PixelIcon color="#064e3b" grid={NAV_ICONS.start} />
+              <span className="program-icon-label">Jugar</span>
             </button>
             <button className="pixel-btn program-icon-btn" title="Volver al menú" aria-label="Volver al menú" onClick={onBackToMenu}>
               <PixelIcon color="#064e3b" grid={NAV_ICONS.menu} />
+              <span className="program-icon-label">Menú</span>
             </button>
           </div>
+
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".txt,text/plain"
+            style={{ display: 'none' }}
+            onChange={async (event) => {
+              const file = event.target.files?.[0]
+              event.target.value = ''
+
+              if (!file) {
+                return
+              }
+
+              try {
+                const text = await file.text()
+                onImportPrograms(text)
+              } catch (error) {
+                const message = error instanceof Error ? error.message : 'No se pudo leer el archivo.'
+                window.alert(message)
+              }
+            }}
+          />
 
           <label className="tips-toggle" title={showProgramTips ? 'Ocultar tips' : 'Mostrar tips'}>
             <input
@@ -111,57 +236,57 @@ export function ProgramEditorScreen({
         </div>
       </div>
 
-      <div className="tank-tabs">
-        {Array.from({ length: config.players }, (_, index) => {
-          const selected = index === selectedTank
-          return (
-            <button
-              key={`tab-${index + 1}`}
-              className={`tank-tab ${selected ? 'active' : ''}`}
-              onClick={() => setSelectedTank(index)}
-            >
-              T{index + 1}
-            </button>
-          )
-        })}
-      </div>
-
       <div className="editor-layout">
         <div className="palette">
-          <h3>Comandos</h3>
-          <ul>
-            {COMMAND_LIBRARY.map((item) => (
-              <li
-                key={item.type}
-                className="palette-item"
-                draggable
-                onDragStart={(event) => {
-                  event.dataTransfer.effectAllowed = 'copy'
-                  event.dataTransfer.setData('text/plain', item.type)
-                  setDragPayload({ kind: 'palette', commandType: item.type })
-                }}
-                onDragEnd={() => setDragPayload(null)}
+            <h3>Comandos</h3>
+            <ul>
+              {COMMAND_LIBRARY.map((item) => (
+                <li
+                  key={item.type}
+                  className="palette-item"
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.effectAllowed = 'copy'
+                    event.dataTransfer.setData('text/plain', item.type)
+                    setDragPayload({ kind: 'palette', commandType: item.type })
+                  }}
+                  onDragEnd={() => setDragPayload(null)}
+                >
+                  <div className="palette-header">
+                    <span className="palette-icon">
+                      <PixelIcon color={item.logo.color} grid={item.logo.grid} />
+                    </span>
+                    <span className="palette-title">{formatCommandTypeLabel(item.type)}</span>
+                  </div>
+                  <div className="palette-actions">
+                    <button
+                      className="small-btn palette-add-btn"
+                      type="button"
+                      title={`Agregar ${formatCommandTypeLabel(item.type)}`}
+                      aria-label={`Agregar ${formatCommandTypeLabel(item.type)}`}
+                      onClick={() => addCommandByClick(item.type)}
+                    >
+                      <PixelIcon color="#064e3b" grid={NAV_ICONS.add} />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+        </div>
+
+        <div className="tank-tabs">
+          {Array.from({ length: config.players }, (_, index) => {
+            const selected = index === selectedTank
+            return (
+              <button
+                key={`tab-${index + 1}`}
+                className={`tank-tab ${selected ? 'active' : ''}`}
+                onClick={() => setSelectedTank(index)}
               >
-                <div className="palette-header">
-                  <span className="palette-icon">
-                    <PixelIcon color={item.logo.color} grid={item.logo.grid} />
-                  </span>
-                  <span className="palette-title">{item.type}</span>
-                </div>
-                <div className="palette-actions">
-                  <button
-                    className="small-btn palette-add-btn"
-                    type="button"
-                    title={`Agregar ${item.type}`}
-                    aria-label={`Agregar ${item.type}`}
-                    onClick={() => addCommandByClick(item.type)}
-                  >
-                    <PixelIcon color="#064e3b" grid={NAV_ICONS.add} />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+                T{index + 1}
+              </button>
+            )
+          })}
         </div>
 
         <div className="program-area" ref={programAreaRef}>
@@ -224,28 +349,8 @@ export function ProgramEditorScreen({
                   <div className="row-controls compact-controls">
                     <div className="row-topline">
                       <span className="row-num">{index + 1}</span>
-                      <div className="row-move">
-                        <button
-                          className="small-btn row-move-btn"
-                          type="button"
-                          title="Subir línea"
-                          disabled={index === 0}
-                          onClick={() => moveCommandUp(index)}
-                        >
-                          ↑
-                        </button>
-                        <button
-                          className="small-btn row-move-btn"
-                          type="button"
-                          title="Bajar línea"
-                          disabled={index === currentProgram.length - 1}
-                          onClick={() => moveCommandDown(index, currentProgram.length)}
-                        >
-                          ↓
-                        </button>
-                      </div>
-                      <span className="row-command-chip">{command.type}</span>
-                      <div className="code-preview code-inline">{commandToText(command)}</div>
+                      <span className="row-command-chip">{formatCommandTypeLabel(command.type)}</span>
+                      <div className="code-preview code-inline">{formatCodePreview(commandToText(command))}</div>
                       <button
                         className="small-btn danger row-delete"
                         type="button"
@@ -258,11 +363,14 @@ export function ProgramEditorScreen({
 
                     <div className="row-detailline">
                       {renderProgramField(
-                        'TIPO',
+                        'Tipo',
                         <PixelSelect
                           title="Tipo"
                           value={command.type}
-                          options={COMMAND_LIBRARY.map((item) => ({ value: item.type, label: item.type }))}
+                          options={COMMAND_LIBRARY.map((item) => ({
+                            value: item.type,
+                            label: formatCommandTypeLabel(item.type),
+                          }))}
                           onChange={(selectedType) => {
                             const nextType = selectedType as CommandType
                             patchCommand(index, (next) => {
@@ -272,7 +380,6 @@ export function ProgramEditorScreen({
                               next.dirSource = reset.dirSource
                               next.dist = reset.dist
                               next.distSource = reset.distSource
-                              next.label = reset.label
                               next.condition = reset.condition
                             })
                           }}
@@ -283,9 +390,9 @@ export function ProgramEditorScreen({
                         renderProgramField(
                           'DIR',
                           <PixelSelect
-                            title="DIR"
+                            title="Dirección"
                             value={command.dir ?? 'N'}
-                            options={DIRECTIONS.map((dir) => ({ value: dir, label: dir }))}
+                            options={DIRECTIONS.map((dir) => ({ value: dir, label: formatDirectionLabel(dir) }))}
                             onChange={(selectedDir) => {
                               const dir = selectedDir as Direction
                               patchCommand(index, (next) => {
@@ -300,9 +407,12 @@ export function ProgramEditorScreen({
                         renderProgramField(
                           'DIR',
                           <PixelSelect
-                            title="DIR"
+                            title="Dirección"
                             value={command.dirSource === 'RAD_DIR' ? 'RAD_DIR' : command.dir ?? 'N'}
-                            options={SHOOT_DIRECTION_OPTIONS.map((option) => ({ value: option, label: option }))}
+                            options={SHOOT_DIRECTION_OPTIONS.map((option) => ({
+                              value: option,
+                              label: formatDirectionLabel(option),
+                            }))}
                             onChange={(value) => {
                               const selected = value as Direction | 'RAD_DIR'
                               patchCommand(index, (next) => {
@@ -323,9 +433,12 @@ export function ProgramEditorScreen({
                           {renderProgramField(
                             'DIR',
                             <PixelSelect
-                              title="DIR"
+                              title="Dirección"
                               value={command.dirSource === 'RAD_DIR' ? 'RAD_DIR' : command.dir ?? 'N'}
-                              options={SHOOT_DIRECTION_OPTIONS.map((option) => ({ value: option, label: option }))}
+                              options={SHOOT_DIRECTION_OPTIONS.map((option) => ({
+                                value: option,
+                                label: formatDirectionLabel(option),
+                              }))}
                               onChange={(value) => {
                                 const selected = value as Direction | 'RAD_DIR'
                                 patchCommand(index, (next) => {
@@ -342,13 +455,13 @@ export function ProgramEditorScreen({
                           )}
 
                           {renderProgramField(
-                            'DIST',
+                            'Dist',
                             <PixelSelect
                               title="Fuente de DIST"
                               value={bombDistSource}
                               options={DIST_SOURCE_OPTIONS.map((source) => ({
                                 value: source,
-                                label: source === 'RAD' ? '|RAD|' : source,
+                                label: source === 'VAL' ? 'Val' : source === 'RAD' ? '|Radar|' : 'Salud',
                               }))}
                               onChange={(value) => {
                                 const distSource = value as BombDistanceSource
@@ -361,11 +474,11 @@ export function ProgramEditorScreen({
 
                           {bombDistSource === 'VAL' && (
                             renderProgramField(
-                              'VAL',
+                              'Val',
                               <div className="field-inline-control">
                                 <input
                                   className="symbol-input symbol-input-sm"
-                                  title="DIST"
+                                  title="Dist"
                                   type="number"
                                   min={1}
                                   max={config.gridSize}
@@ -382,7 +495,7 @@ export function ProgramEditorScreen({
                                 <button
                                   className="small-btn field-quick-btn"
                                   type="button"
-                                  title="Usar valor absoluto de RAD"
+                                  title="Usar valor absoluto de Radar"
                                   onClick={() => {
                                     patchCommand(index, (next) => {
                                       next.distSource = 'RAD'
@@ -398,33 +511,16 @@ export function ProgramEditorScreen({
                         </>
                       )}
 
-                      {command.type === 'LABEL' && (
-                        renderProgramField(
-                          'LABEL',
-                          <input
-                            className="symbol-input"
-                            title="Nombre de la etiqueta"
-                            type="text"
-                            value={command.label ?? 'LOOP'}
-                            onChange={(event) => {
-                              patchCommand(index, (next) => {
-                                next.label = event.target.value.toUpperCase()
-                              })
-                            }}
-                          />,
-                        )
-                      )}
-
-                      {(command.type === 'IF' || command.type === 'JUMP') && (
+                      {command.type === 'IF' && (
                         <>
                           {renderProgramField(
-                            'COND',
+                            'Cond',
                             <PixelSelect
                               title="Condición"
                               value={condition.kind}
                               options={CONDITION_OPTIONS.map((option) => ({
                                 value: option.kind,
-                                label: option.label,
+                                label: formatConditionLabel(option.kind),
                               }))}
                               onChange={(value) => {
                                 const kind = value as ConditionKind
@@ -438,13 +534,13 @@ export function ProgramEditorScreen({
                           {condition.kind === 'REGISTER_COMPARE' && (
                             <>
                               {renderProgramField(
-                                'REG',
+                                'Reg',
                                 <PixelSelect
                                   title="Registro"
                                   value={condition.register ?? 'RAD'}
                                   options={REGISTER_OPTIONS.map((register) => ({
                                     value: register,
-                                    label: register,
+                                    label: formatRegisterLabel(register),
                                   }))}
                                   onChange={(value) => {
                                     const register = value as NumericRegister
@@ -462,7 +558,7 @@ export function ProgramEditorScreen({
                               )}
 
                               {renderProgramField(
-                                'OP',
+                                'Op',
                                 <PixelSelect
                                   title="Operador"
                                   value={condition.operator ?? '>'}
@@ -486,7 +582,7 @@ export function ProgramEditorScreen({
                               )}
 
                               {renderProgramField(
-                                'VAL',
+                                'Val',
                                 <input
                                   className="symbol-input symbol-input-sm"
                                   title="Valor"
@@ -513,11 +609,11 @@ export function ProgramEditorScreen({
 
                           {condition.kind === 'DIR_MOV_EQ' && (
                             renderProgramField(
-                              'DIRC',
+                              'Dirc',
                               <PixelSelect
-                                title="DIR"
+                                title="Dirección"
                                 value={condition.dir ?? 'N'}
-                                options={DIRECTIONS.map((dir) => ({ value: dir, label: dir }))}
+                                options={DIRECTIONS.map((dir) => ({ value: dir, label: formatDirectionLabel(dir) }))}
                                 onChange={(value) => {
                                   const dir = value as Direction
                                   patchCommand(index, (next) => {
@@ -533,31 +629,16 @@ export function ProgramEditorScreen({
                               />,
                             )
                           )}
+
                         </>
                       )}
 
-                      {command.type === 'JUMP' && (
-                        renderProgramField(
-                          'LABEL',
-                          <input
-                            className="symbol-input"
-                            title="Línea o LABEL a saltar"
-                            type="text"
-                            value={command.label ?? 'LOOP'}
-                            onChange={(event) => {
-                              patchCommand(index, (next) => {
-                                next.label = event.target.value.toUpperCase()
-                              })
-                            }}
-                          />,
-                        )
-                      )}
                     </div>
 
                     {closesPreviousIf && (
-                      <div className="if-end-marker" aria-label="ENDIF automático">
+                      <div className="if-end-marker" aria-label="Fin if automático">
                         <span className="if-end-line" />
-                        <span>ENDIF</span>
+                        <span>Fin if</span>
                       </div>
                     )}
                   </div>

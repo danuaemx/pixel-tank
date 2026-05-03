@@ -30,15 +30,6 @@ export function commandToText(command: Command): string {
     return `BOMBA(${dirText},${distText})`
   }
 
-  if (command.type === 'LABEL') {
-    return `LABEL ${command.label ?? 'LOOP'}`
-  }
-
-  if (command.type === 'JUMP') {
-    const cond = conditionToText(command.condition)
-    return `JUMP[${cond}, ${command.label ?? 'LOOP'}]`
-  }
-
   if (command.type === 'IF') {
     return `IF(${conditionToText(command.condition)})`
   }

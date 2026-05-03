@@ -26,4 +26,5 @@ export {
   createInitialGameState,
   normalizeProgramsForPlayers,
 } from './setup'
+export { parseProgramsFromText, serializeProgramsToText } from './serialization'
 export { cellKey } from './utils'

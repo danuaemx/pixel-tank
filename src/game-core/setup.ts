@@ -30,10 +30,6 @@ export function createCommandTemplate(type: CommandType): Command {
       return { id: createId('cmd'), type, dir: 'N' }
     case 'IF':
       return { id: createId('cmd'), type, condition: { kind: 'TRUE' } }
-    case 'LABEL':
-      return { id: createId('cmd'), type, label: 'LOOP' }
-    case 'JUMP':
-      return { id: createId('cmd'), type, label: 'LOOP', condition: { kind: 'TRUE' } }
     case 'ESPERA':
     default:
       return { id: createId('cmd'), type: 'ESPERA' }
@@ -56,9 +52,6 @@ export function createDefaultConfig(): GameConfig {
 
 function buildProgram(variant: number): Command[] {
   if (variant === 0) {
-    const label = createCommandTemplate('LABEL')
-    label.label = 'LOOP'
-
     const radar = createCommandTemplate('RAD')
     radar.dir = 'N'
 
@@ -71,17 +64,10 @@ function buildProgram(variant: number): Command[] {
     const move = createCommandTemplate('MOVER')
     move.dir = 'E'
 
-    const jump = createCommandTemplate('JUMP')
-    jump.label = 'LOOP'
-    jump.condition = { kind: 'TRUE' }
-
-    return [label, radar, conditionIf, shoot, move, jump]
+    return [radar, conditionIf, shoot, move]
   }
 
   if (variant === 1) {
-    const label = createCommandTemplate('LABEL')
-    label.label = 'TRAMPA'
-
     const mine = createCommandTemplate('COLOCAR_MINA')
 
     const move = createCommandTemplate('MOVER')
@@ -90,20 +76,13 @@ function buildProgram(variant: number): Command[] {
     const radar = createCommandTemplate('RAD')
     radar.dir = 'E'
 
-    const jumpIf = createCommandTemplate('JUMP')
-    jumpIf.label = 'TRAMPA'
-    jumpIf.condition = { kind: 'REGISTER_COMPARE', register: 'RAD', operator: '<', value: 0 }
-
     const shoot = createCommandTemplate('DISPARAR')
     shoot.dir = 'E'
 
-    return [label, mine, move, radar, jumpIf, shoot]
+    return [mine, move, radar, shoot]
   }
 
   if (variant === 2) {
-    const loop = createCommandTemplate('LABEL')
-    loop.label = 'BOMB'
-
     const ifDamaged = createCommandTemplate('IF')
     ifDamaged.condition = { kind: 'DAÑO' }
 
@@ -115,15 +94,8 @@ function buildProgram(variant: number): Command[] {
     const move = createCommandTemplate('MOVER')
     move.dir = 'N'
 
-    const jump = createCommandTemplate('JUMP')
-    jump.label = 'BOMB'
-    jump.condition = { kind: 'TRUE' }
-
-    return [loop, ifDamaged, bomb, move, jump]
+    return [ifDamaged, bomb, move]
   }
-
-  const loop = createCommandTemplate('LABEL')
-  loop.label = 'SCAN'
 
   const radar = createCommandTemplate('RAD')
   radar.dir = 'S'
@@ -137,11 +109,7 @@ function buildProgram(variant: number): Command[] {
   const shoot = createCommandTemplate('DISPARAR')
   shoot.dir = 'S'
 
-  const jump = createCommandTemplate('JUMP')
-  jump.label = 'SCAN'
-  jump.condition = { kind: 'TRUE' }
-
-  return [loop, radar, ifPositive, move, shoot, jump]
+  return [radar, ifPositive, move, shoot]
 }
 
 export function createDefaultPrograms(players: number): Command[][] {
