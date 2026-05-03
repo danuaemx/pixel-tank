@@ -1,62 +1,129 @@
-# Pixel Tank Arena (React + TypeScript)
+# Tanques Game
 
-Juego de tanques programables con estilo pixel, audio 8-bit y simulación automática por turnos.
+Juego de tanques programables con estética pixel, simulación por turnos y audio retro hecho con Web Audio API.
 
-## Ejecutar
+## Resumen
+
+Cada tanque ejecuta un programa propio por turnos. El objetivo es sobrevivir, destruir oponentes y sumar más puntos al final de la partida. La interfaz está pensada para editar estrategias, ajustar reglas de juego y ejecutar simulaciones tanto rápidas como configuradas a mano.
+
+## Requisitos
+
+- Node.js 18 o superior.
+- npm.
+
+## Instalación y ejecución
 
 ```bash
 npm install
+```
+
+### Modo desarrollo
+
+```bash
 npm run dev
 ```
 
-Build de producción:
+Arranca Vite con recarga en caliente para desarrollar la interfaz y probar cambios de forma inmediata.
+
+### Producción local
 
 ```bash
 npm run build
+npm run preview
 ```
 
-## Funcionalidades implementadas
+`npm run build` genera la compilación optimizada. `npm run preview` sirve esa compilación como si fuera producción para validar el resultado final.
 
-- Menú principal con acceso a `Tutorial`, `Configuración`, `Programar estrategia` y `Partida rápida (default)`.
-- Configuración personalizable:
-  - Número de tanques: `2` a `6`.
-  - Tamaño de tablero: `6x6` a `15x15`.
-  - Líneas pasivas permitidas por turno.
-- Editor drag-and-drop de estrategias por tanque.
-- Motor de comandos:
-  - `MOVER(DIR)`
-  - `DISPARAR(DIR)`
-  - `COLOCAR_MINA`
-  - `BOMBA(DIR,DIST)`
-  - `RAD(DIR)`
-  - `IF(COND)`
-  - `ESPERA`
-  - `LABEL`
-  - `JUMP[COND,LABEL]`
-- Registros por tanque:
-  - `RAD`
-  - `DAÑO_DIR`
-  - `DIR_MOV`
-  - `SALUD`
-- Reglas principales:
-  - Vida inicial: `100`.
-  - Minas: `3` por tanque, daño `-40`.
-  - Bombas: `2` por tanque, daño `-30` en 3x3 y `-15` residual alrededor.
-  - Disparo ilimitado, daño `-20` instantáneo en el turno.
-  - Colisiones (borde/pared/tanque): `-10`.
-  - Estaciones de reparación: curan y se reubican cada 5 rondas.
-  - Puntuación por eliminaciones y salud final, con bonus de eficiencia para código más corto.
-- Animaciones visuales para disparo, explosión, impacto, curación y minas.
+## Scripts disponibles
+
+- `npm run dev`: arranca Vite en modo desarrollo.
+- `npm run build`: compila TypeScript y genera la versión de producción.
+- `npm run preview`: prueba la compilación localmente.
+- `npm run lint`: ejecuta ESLint sobre el proyecto.
+
+## Cómo se juega
+
+1. Entra al menú principal y elige `Configuración`, `Programar estrategia` o `Partida rápida`.
+2. Ajusta la cantidad de tanques, el tamaño del tablero, el límite de líneas pasivas, las bombas, las minas y la cantidad máxima de rondas.
+3. Abre el editor de programas y arma la secuencia de comandos para cada tanque.
+4. Inicia la simulación y mira cómo el motor resuelve los turnos automáticamente.
+5. Al finalizar, el juego calcula el puntaje total y declara un ganador.
+
+## Funcionalidades
+
+- Menú principal con acceso a configuración, tutorial, créditos, programación y partida rápida.
+- Configuración de partida con opciones para:
+  - Número de tanques.
+  - Tamaño del tablero.
+  - Límite de líneas pasivas.
+  - Rondas máximas.
+  - Bombas y minas por tanque.
+  - Tamaño de letra de la interfaz.
+  - Volumen base.
+- Editor visual para cargar, reordenar y limpiar programas por tanque.
+- Simulación automática por turnos con:
+  - colisiones contra borde, pared y otros tanques,
+  - minas y bombas,
+  - estaciones de reparación que curan y se reubican,
+  - puntuación por eliminaciones y salud final,
+  - final de partida con ganador.
+- Interfaz pixel art con paneles, barras, iconos y efectos animados.
 - Sonidos y música 8-bit generados con Web Audio API.
 
-## Mapa rápido del código
+## Comandos del juego
 
-- `src/main.tsx`: punto de entrada; monta React y carga estilos globales.
-- `src/App.tsx`: coordina pantallas, estado global, audio y navegación.
-- `src/game.ts`: reexporta el motor para que la app importe todo desde un solo sitio.
-- `src/game-core/setup.ts`: crea configuraciones, programas por defecto y el estado inicial.
-- `src/game-core/engine.ts`: ejecuta los turnos y aplica las reglas de combate.
-- `src/game-core/utils.ts`: utilidades de cálculo, búsqueda y evaluación de condiciones.
-- `src/audio.ts`: reproduce sonidos y música 8-bit.
-- `src/app/screens/`: pantallas de menú, configuración, tutorial y editor de programas.
-- `src/components/`: UI compartida de la partida y piezas visuales reutilizables.
+La programación usa estos comandos:
+
+| Comando | Descripción |
+| --- | --- |
+| `MOVER` | Avanza una casilla en N, S, E u O. |
+| `DISPARAR` | Ataca en línea recta y daña al primer objetivo que encuentre. |
+| `COLOCAR_MINA` | Deja una mina en la casilla actual. |
+| `BOMBA` | Ejecuta un ataque radial a distancia configurable. |
+| `RAD` | Lee información de la dirección seleccionada y guarda el resultado en un registro. |
+| `IF` | Evalúa una condición y, si falla, salta la siguiente instrucción. |
+| `ESPERA` | No ejecuta acción, útil para controlar el orden o consumir turno. |
+
+### Registros y condiciones
+
+- Registros disponibles: `RAD`, `RAD_DIR`, `DANO_DIR`, `DIR_MOV`, `SALUD`.
+- Condiciones: `TRUE`, `REGISTER_COMPARE`, `DAÑO`, `DIR_MOV_EQ`.
+
+### Efectos de juego
+
+- Vida inicial: `100`.
+- Colisión contra borde, pared u otro tanque: `-10`.
+- Disparo: daño instantáneo de `-20`.
+- Mina: daño de `-40`.
+- Bomba: daño radial con reducción por zona.
+- Estación de reparación: cura `10` puntos y puede moverse cada 5 rondas.
+- Eliminar objetivos aporta recuperación y puntuación extra.
+
+## Audio y música
+
+La carpeta [public/music](public/music) contiene las pistas usadas por la app:
+
+- `Menu.mp3`
+- `otras_pantallas.mp3`
+- `programar_sad.mp3`
+- `programar_happy_ganar.mp3`
+- `jugar_1.mp3`
+- `jugar_2.mp3`
+- `jugar_3.mp3`
+
+Durante la partida se rotan aleatoriamente `jugar_1`, `jugar_2` y `jugar_3`. Cuando la partida termina y hay ganador, la música de victoria usa `programar_happy_ganar.mp3`.
+
+## Estructura principal
+
+- `src/main.tsx`: punto de entrada de React.
+- `src/App.tsx`: coordina pantallas, navegación, estado global y audio.
+- `src/audio.ts`: motor de sonido y música.
+- `src/game-core/`: motor de simulación, tipos, utilidades y configuración inicial.
+- `src/app/screens/`: pantallas de menú, configuración, tutorial, créditos y editor.
+- `src/components/`: componentes reutilizables de la interfaz.
+
+## Notas
+
+- La app guarda localmente el tamaño de letra y el volumen base.
+- El volumen base se calibra internamente para que la música no quede demasiado alta.
+- La versión de producción se obtiene con `npm run build` y se prueba con `npm run preview`.
