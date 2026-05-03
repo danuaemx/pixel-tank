@@ -24,6 +24,7 @@ import {
   IconSettings,
   IconTag,
   IconTargetArrow,
+  IconStar,
   IconX,
 } from '@tabler/icons-react'
 import type { ElementType } from 'react'
@@ -66,6 +67,7 @@ const iconByGrid = new Map<string, ElementType>([
   [gridKey([' ### ', '#####', ' ### ', ' ### ', ' # # ']), IconX],
   [gridKey(['  #  ', ' ### ', '#   #', ' ### ', '  #  ']), IconPlus],
   [gridKey([' ### ', ' # # ', ' ### ', '  #  ', '  #  ']), IconTag],
+  [gridKey(['  #  ', '# # #', ' ### ', '# # #', '  #  ']), IconStar],
   [gridKey(['#####', '# # #', '#   #', '# # #', '#####']), IconMenu2],
   [gridKey(['# #', '# #', '# #', '# #', '# #']), IconPlayerPause],
   [gridKey(['#   #', '##  #', '### #', '##  #', '#   #']), IconPlayerPlay],

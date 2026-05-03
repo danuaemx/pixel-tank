@@ -1,18 +1,37 @@
 import type { SoundKey } from './game'
 
 export type UiSoundKey = 'ui-nav' | 'ui-action' | 'ui-step' | 'ui-toggle' | 'ui-danger'
-export type MusicTheme = 'menu' | 'game' | 'quick'
+export type MusicTheme = 'menu' | 'screens' | 'program' | 'game' | 'quick' | 'victory'
+
+const MUSIC_TRACKS: Record<MusicTheme, string> = {
+  menu: '/music/Menu.mp3',
+  screens: '/music/otras_pantallas.mp3',
+  program: '/music/programar_sad.mp3',
+  game: '/music/jugar_1.mp3',
+  quick: '/music/jugar_2.mp3',
+  victory: '/music/jugar_3.mp3',
+}
 
 class ChiptuneAudio {
   private context: AudioContext | null = null
 
-  private musicInterval: number | null = null
-
-  private musicStep = 0
-
   private musicTheme: MusicTheme | null = null
 
+  private musicElement: HTMLAudioElement | null = null
+
+  private musicNextElement: HTMLAudioElement | null = null
+
+  private musicLoopFrame: number | null = null
+
+  private musicTransitionStart = 0
+
+  private musicSessionToken = 0
+
   private masterVolume = 1.7
+
+  private readonly musicFadeSeconds = 0.05
+
+  private readonly musicLeadSeconds = 0.05
 
   private clampGain(value: number): number {
     return Math.min(0.7, Math.max(0.0001, value))
@@ -156,12 +175,120 @@ class ChiptuneAudio {
     }
   }
 
+  private getMusicElement(theme: MusicTheme): HTMLAudioElement {
+    return this.createMusicElement(theme)
+  }
+
+  private syncMusicVolume(): void {
+    if (!this.musicElement) {
+      return
+    }
+
+    const targetVolume = this.getMusicVolume()
+    this.musicElement.volume = targetVolume
+
+    if (this.musicNextElement) {
+      this.musicNextElement.volume = targetVolume
+    }
+  }
+
+  private getMusicVolume(): number {
+    return Math.min(1, Math.max(0, this.masterVolume * 0.22))
+  }
+
+  private createMusicElement(theme: MusicTheme): HTMLAudioElement {
+    const element = new Audio(MUSIC_TRACKS[theme])
+    element.loop = false
+    element.preload = 'auto'
+    element.volume = this.getMusicVolume()
+    return element
+  }
+
+  private clearMusicLoop(): void {
+    if (this.musicLoopFrame !== null) {
+      window.cancelAnimationFrame(this.musicLoopFrame)
+      this.musicLoopFrame = null
+    }
+
+    this.musicTransitionStart = 0
+
+    if (this.musicNextElement) {
+      this.musicNextElement.pause()
+      this.musicNextElement.currentTime = 0
+      this.musicNextElement = null
+    }
+  }
+
+  private monitorMusic(theme: MusicTheme, sessionToken: number): void {
+    const tick = () => {
+      if (
+        sessionToken !== this.musicSessionToken ||
+        this.musicTheme !== theme ||
+        !this.musicElement
+      ) {
+        this.musicLoopFrame = null
+        return
+      }
+
+      const sourceElement = this.musicElement
+
+      if (this.musicNextElement) {
+        const progress = Math.min(
+          1,
+          (performance.now() - this.musicTransitionStart) / (this.musicFadeSeconds * 1000),
+        )
+        const targetVolume = this.getMusicVolume()
+        sourceElement.volume = targetVolume * (1 - progress)
+        this.musicNextElement.volume = targetVolume * progress
+
+        if (progress >= 1) {
+          sourceElement.pause()
+          sourceElement.currentTime = 0
+          this.musicElement = this.musicNextElement
+          this.musicNextElement = null
+          this.musicTransitionStart = 0
+          this.syncMusicVolume()
+        }
+
+        this.musicLoopFrame = window.requestAnimationFrame(tick)
+        return
+      }
+
+      const duration = sourceElement.duration
+      if (!Number.isFinite(duration) || duration <= 0) {
+        this.musicLoopFrame = window.requestAnimationFrame(tick)
+        return
+      }
+
+      const remaining = duration - sourceElement.currentTime
+      if (remaining <= this.musicLeadSeconds) {
+        const nextElement = this.createMusicElement(theme)
+        nextElement.currentTime = 0
+        nextElement.volume = 0
+        this.musicNextElement = nextElement
+        this.musicTransitionStart = performance.now()
+
+        void nextElement.play().catch(() => {
+          if (this.musicNextElement === nextElement) {
+            this.musicNextElement = null
+            this.musicTransitionStart = 0
+          }
+        })
+      }
+
+      this.musicLoopFrame = window.requestAnimationFrame(tick)
+    }
+
+    this.musicLoopFrame = window.requestAnimationFrame(tick)
+  }
+
   setMasterVolume(multiplier: number): void {
     if (!Number.isFinite(multiplier)) {
       return
     }
 
     this.masterVolume = Math.min(3.5, Math.max(0.05, multiplier))
+    this.syncMusicVolume()
   }
 
   getMasterVolume(): number {
@@ -182,69 +309,43 @@ class ChiptuneAudio {
   }
 
   startMusic(theme: MusicTheme = 'game'): void {
-    if (this.musicInterval !== null && this.musicTheme === theme) {
+    if (this.musicTheme === theme && this.musicElement && !this.musicElement.paused) {
+      this.syncMusicVolume()
+      if (this.musicLoopFrame === null) {
+        this.monitorMusic(theme, this.musicSessionToken)
+      }
       return
     }
 
-    if (this.musicInterval !== null) {
-      window.clearInterval(this.musicInterval)
-      this.musicInterval = null
+    this.musicSessionToken += 1
+    this.clearMusicLoop()
+
+    if (this.musicElement) {
+      this.musicElement.pause()
+      this.musicElement.currentTime = 0
     }
 
+    const musicElement = this.getMusicElement(theme)
+    musicElement.currentTime = 0
+    musicElement.volume = this.getMusicVolume()
+    this.musicElement = musicElement
     this.musicTheme = theme
-    this.musicStep = 0
+    void musicElement.play().catch(() => {
+      // Ignorado: el navegador puede bloquear la reproducción hasta una interacción real.
+    })
 
-    const melody =
-      theme === 'menu'
-        ? [
-            392, 440, 523.25, 587.33, 523.25, 440, 392, 349.23,
-            329.63, 349.23, 392, 440, 392, 349.23, 329.63, 293.66,
-          ]
-        : theme === 'quick'
-          ? [
-              329.63, 392, 493.88, 659.25, 587.33, 493.88, 392, 329.63,
-              293.66, 369.99, 440, 587.33, 523.25, 440, 369.99, 329.63,
-            ]
-        : [
-            196, 246.94, 293.66, 329.63, 293.66, 246.94, 196, 174.61,
-            220, 261.63, 311.13, 349.23, 311.13, 261.63, 220, 196,
-          ]
-
-    const stepMs = theme === 'menu' ? 290 : theme === 'quick' ? 230 : 250
-
-    this.ensureContext()
-
-    this.musicInterval = window.setInterval(() => {
-      const note = melody[this.musicStep % melody.length]
-      if (theme === 'menu') {
-        this.playTone(note, 0.14, 'triangle', 0.022)
-        if (this.musicStep % 4 === 0) {
-          this.playTone(note / 2, 0.22, 'sine', 0.014)
-        }
-      } else if (theme === 'quick') {
-        this.playTone(note, 0.1, 'square', 0.022)
-        this.playTone(note * 2, 0.045, 'triangle', 0.01, 0.012)
-        if (this.musicStep % 4 === 0) {
-          this.playTone(note / 2, 0.16, 'triangle', 0.013)
-        }
-      } else {
-        this.playTone(note, 0.12, 'square', 0.022)
-        if (this.musicStep % 4 === 0) {
-          this.playTone(note / 2, 0.2, 'triangle', 0.014)
-        }
-      }
-
-      this.musicStep += 1
-    }, stepMs)
+    this.monitorMusic(theme, this.musicSessionToken)
   }
 
   stopMusic(): void {
-    if (this.musicInterval !== null) {
-      window.clearInterval(this.musicInterval)
-      this.musicInterval = null
+    if (this.musicElement) {
+      this.musicElement.pause()
+      this.musicElement.currentTime = 0
     }
+    this.clearMusicLoop()
     this.musicTheme = null
-    this.musicStep = 0
+    this.musicElement = null
+    this.musicSessionToken += 1
   }
 }
 

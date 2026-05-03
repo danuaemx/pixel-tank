@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import { chiptuneAudio } from './audio'
+import type { MusicTheme } from './audio'
 import {
   DEFAULT_MASTER_VOLUME,
   DEFAULT_UI_FONT_SIZE,
   NAV_ICONS,
 } from './app/_const'
-import type { DragPayload, GameMusicTheme, MenuConfirmSource, Screen } from './app/types'
+import type { DragPayload, MenuConfirmSource, Screen } from './app/types'
 import {
   getConditionForEditor,
   getReturnToMenuDialog,
@@ -44,6 +45,8 @@ import {
 } from './game'
 
 function App() {
+  const GAME_THEMES: MusicTheme[] = ['game', 'quick', 'victory']
+
   // Estado principal de la aplicación: pantalla activa, configuración y sesión de juego.
   const [screen, setScreen] = useState<Screen>('menu')
   const [config, setConfig] = useState<GameConfig>(() => createDefaultConfig())
@@ -55,7 +58,7 @@ function App() {
   const [dragPayload, setDragPayload] = useState<DragPayload | null>(null)
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [running, setRunning] = useState(false)
-  const [gameMusicTheme, setGameMusicTheme] = useState<GameMusicTheme>('game')
+  const [gameMusicTheme, setGameMusicTheme] = useState<MusicTheme>('game')
   const [animatePassiveLines, setAnimatePassiveLines] = useState(true)
   const [restartConfirmOpen, setRestartConfirmOpen] = useState(false)
   const [clearProgramConfirmOpen, setClearProgramConfirmOpen] = useState(false)
@@ -90,6 +93,35 @@ function App() {
 
   const currentProgram = programs[selectedTank] ?? []
   const programAreaRef = useRef<HTMLDivElement | null>(null)
+  const screenMusicTheme = (() => {
+    if (screen === 'menu') {
+      return 'menu'
+    }
+
+    if (screen === 'tutorial' || screen === 'credits' || screen === 'config') {
+      return 'screens'
+    }
+
+    if (screen === 'program') {
+      return 'program'
+    }
+
+    if (screen === 'game' && gameState?.finished) {
+      return 'victory'
+    }
+
+    return gameMusicTheme
+  })()
+
+  const pickGameMusicTheme = (): MusicTheme => {
+    const index = Math.floor(Math.random() * GAME_THEMES.length)
+    return GAME_THEMES[index] ?? 'game'
+  }
+
+  const startScreenMusic = (theme: typeof screenMusicTheme): void => {
+    chiptuneAudio.unlockAudio()
+    chiptuneAudio.startMusic(theme)
+  }
 
   // Efectos globales: audio, cierre de pestaña, música y sincronización del juego.
   useEffect(() => {
@@ -117,13 +149,8 @@ function App() {
   }, [screen])
 
   useEffect(() => {
-    if (screen === 'game') {
-      chiptuneAudio.startMusic(gameMusicTheme)
-      return
-    }
-
-    chiptuneAudio.startMusic('menu')
-  }, [screen, gameMusicTheme])
+    startScreenMusic(screenMusicTheme)
+  }, [screenMusicTheme])
 
   useEffect(() => {
     if (chiptuneAudio.isAudioUnlocked()) {
@@ -132,13 +159,7 @@ function App() {
 
     const startCurrentTheme = () => {
       // El navegador solo permite iniciar el audio después de una interacción real.
-      chiptuneAudio.unlockAudio()
-      if (screen === 'game') {
-        chiptuneAudio.startMusic(gameMusicTheme)
-        return
-      }
-
-      chiptuneAudio.startMusic('menu')
+      startScreenMusic(screenMusicTheme)
     }
 
     window.addEventListener('pointerdown', startCurrentTheme, { capture: true, once: true })
@@ -150,7 +171,7 @@ function App() {
       window.removeEventListener('keydown', startCurrentTheme, true)
       window.removeEventListener('touchstart', startCurrentTheme, true)
     }
-  }, [screen, gameMusicTheme])
+  }, [screenMusicTheme])
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -318,7 +339,7 @@ function App() {
   }
 
   const startSimulation = (quick = false): void => {
-    const selectedTheme: GameMusicTheme = quick ? 'quick' : 'game'
+    const selectedTheme = pickGameMusicTheme()
     const selectedConfig = quick ? createDefaultConfig() : config
     const selectedPrograms = quick
       ? createDefaultPrograms(selectedConfig.players)
@@ -338,7 +359,7 @@ function App() {
     setGameState(initialState)
     setScreen('game')
     setRunning(true)
-    chiptuneAudio.startMusic(selectedTheme)
+    startScreenMusic(selectedTheme)
   }
 
   const restartSimulation = (): void => {
@@ -346,7 +367,7 @@ function App() {
     setPrograms(normalizedPrograms)
     setGameState(createInitialGameState(config, normalizedPrograms))
     setRunning(true)
-    chiptuneAudio.startMusic(gameMusicTheme)
+    startScreenMusic(gameMusicTheme)
   }
 
   const exportProgramsToText = (): void => {
