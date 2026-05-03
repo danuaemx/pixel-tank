@@ -738,7 +738,7 @@ function App() {
       <section className="panel boot-screen">
         <div className="boot-hero">
           <p className="boot-kicker">Preparando batalla</p>
-          <h1 className="title boot-title">Tanques Game</h1>
+          <h1 className="title boot-title">Pixel Tanks</h1>
           <p className="subtitle boot-subtitle">
             Cargando cursores, sonidos y texturas antes de entrar al menú.
           </p>

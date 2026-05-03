@@ -1,4 +1,4 @@
-# Tanques Game
+# Pixel Tanks
 
 Juego de tanques programables con estética pixel, simulación por turnos y audio retro hecho con Web Audio API.
 
