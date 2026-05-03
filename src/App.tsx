@@ -15,6 +15,7 @@ import {
   sanitizeUiFontSize,
 } from './app/utils'
 import { ConfigScreen } from './app/screens/ConfigScreen'
+import { CreditsScreen } from './app/screens/CreditsScreen'
 import { MenuScreen } from './app/screens/MenuScreen'
 import { ProgramEditorScreen } from './app/screens/ProgramEditorScreen'
 import { TutorialScreen } from './app/screens/TutorialScreen'
@@ -57,6 +58,7 @@ function App() {
   const [gameMusicTheme, setGameMusicTheme] = useState<GameMusicTheme>('game')
   const [animatePassiveLines, setAnimatePassiveLines] = useState(true)
   const [restartConfirmOpen, setRestartConfirmOpen] = useState(false)
+  const [clearProgramConfirmOpen, setClearProgramConfirmOpen] = useState(false)
   const [showProgramTips, setShowProgramTips] = useState(true)
   const [recentlyAddedCommandId, setRecentlyAddedCommandId] = useState<string | null>(null)
   const [menuConfirmSource, setMenuConfirmSource] = useState<MenuConfirmSource | null>(null)
@@ -375,6 +377,24 @@ function App() {
     }
   }
 
+  const askClearSelectedProgram = (): void => {
+    setClearProgramConfirmOpen(true)
+  }
+
+  const cancelClearSelectedProgram = (): void => {
+    setClearProgramConfirmOpen(false)
+  }
+
+  const confirmClearSelectedProgram = (): void => {
+    setClearProgramConfirmOpen(false)
+    setPrograms((previous) => {
+      const next = previous.map((program) => [...program])
+      next[selectedTank] = []
+      return next
+    })
+    setRecentlyAddedCommandId(null)
+  }
+
   // Edición del programa seleccionado.
   const updateSelectedProgram = (updater: (program: Command[]) => Command[]): void => {
     setPrograms((previous) => {
@@ -507,7 +527,6 @@ function App() {
         >
           -
         </button>
-      // Confirmaciones de navegación y reinicio.
         <input
           className="config-number-input"
           type="number"
@@ -574,12 +593,17 @@ function App() {
         onOpenConfig={() => setScreen('config')}
         onOpenProgram={() => setScreen('program')}
         onOpenTutorial={() => setScreen('tutorial')}
+        onOpenCredits={() => setScreen('credits')}
       />
     )
   }
 
   const renderTutorial = () => {
     return <TutorialScreen onBackToMenu={() => askReturnToMenu('tutorial')} />
+  }
+
+  const renderCredits = () => {
+    return <CreditsScreen onBackToMenu={() => askReturnToMenu('credits')} />
   }
 
   const renderConfig = () => {
@@ -627,6 +651,7 @@ function App() {
         renderProgramField={renderProgramField}
         onExportPrograms={exportProgramsToText}
         onImportPrograms={importProgramsFromText}
+        onClearProgram={askClearSelectedProgram}
         onBackToConfig={() => setScreen('config')}
         onStartSimulation={() => startSimulation(false)}
         onBackToMenu={() => askReturnToMenu('program')}
@@ -660,6 +685,7 @@ function App() {
       <main className="app-shell">
         {screen === 'menu' && renderMenu()}
         {screen === 'tutorial' && renderTutorial()}
+        {screen === 'credits' && renderCredits()}
         {screen === 'config' && renderConfig()}
         {screen === 'program' && renderProgramEditor()}
         {screen === 'game' && renderGame()}
@@ -697,6 +723,25 @@ function App() {
               <button className="pixel-btn danger btn-with-icon" onClick={confirmRestartSimulation}>
                 <span className="btn-icon"><PixelIcon color="#ffffff" grid={NAV_ICONS.restart} /></span>
                 <span>Reiniciar</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {clearProgramConfirmOpen && (
+        <div className="confirm-overlay clear-confirm-overlay" role="dialog" aria-modal="true" aria-label="Limpiar programa del tanque">
+          <section className="panel confirm-panel clear-confirm-panel">
+            <h3>Limpiar programa</h3>
+            <p>Se borrará solo el programa del tanque T{selectedTank + 1}. ¿Deseas continuar?</p>
+            <div className="confirm-actions">
+              <button className="pixel-btn secondary btn-with-icon" onClick={cancelClearSelectedProgram}>
+                <span className="btn-icon"><PixelIcon color="#1f2937" grid={NAV_ICONS.cancel} /></span>
+                <span>Cancelar</span>
+              </button>
+              <button className="pixel-btn danger btn-with-icon" onClick={confirmClearSelectedProgram}>
+                <span className="btn-icon"><PixelIcon color="#ffffff" grid={NAV_ICONS.cancel} /></span>
+                <span>Limpiar</span>
               </button>
             </div>
           </section>

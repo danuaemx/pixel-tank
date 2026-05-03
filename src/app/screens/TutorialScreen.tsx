@@ -45,6 +45,19 @@ export function TutorialScreen({ onBackToMenu }: TutorialScreenProps) {
         <li><span className="tutorial-item-icon"><PixelIcon color="#fcd34d" grid={[' ### ', '#   #', '#   #', '#   #', ' ### ']} /></span><strong>Salud</strong>: vida actual del tanque (0 a 100).</li>
       </ul>
 
+      <h3>Tags del tanque</h3>
+      <ul className="tutorial-list">
+        <li><span className="tutorial-item-icon"><PixelIcon color="#fcd34d" grid={[' ### ', '#   #', '#   #', '#   #', ' ### ']} /></span><strong>Salud</strong>: vida actual del tanque.</li>
+        <li><span className="tutorial-item-icon"><PixelIcon color="#ef4444" grid={['#   #', ' # # ', '  #  ', ' # # ', '#   #']} /></span><strong>Eliminaciones</strong>: cuántos tanques enemigos ha destruido.</li>
+        <li><span className="tutorial-item-icon"><PixelIcon color="#f87171" grid={[' ### ', '#####', ' # # ', ' # # ', '  #  ', '  #  ', '  #  ']} /></span><strong>Bombas</strong>: bombas disponibles para usar.</li>
+        <li><span className="tutorial-item-icon"><PixelIcon color="#facc15" grid={['  #  ', ' ### ', '#####', ' ### ', '  #  ']} /></span><strong>Minas</strong>: minas disponibles para colocar.</li>
+        <li><span className="tutorial-item-icon"><PixelIcon color="#34d399" grid={['#####', '#   #', '### #', '#   #', '#####']} /></span><strong>Radar</strong>: resultado de la última lectura del radar.</li>
+        <li><span className="tutorial-item-icon"><PixelIcon color="#22d3ee" grid={[' ### ', '#   #', '# # #', '#   #', ' ### ']} /></span><strong>Radar_dir</strong>: última dirección usada por Radar.</li>
+        <li><span className="tutorial-item-icon"><PixelIcon color="#f87171" grid={['#   #', '## ##', '# # #', '#   #', '#   #']} /></span><strong>Dano_dir</strong>: dirección desde la que recibió daño en el turno previo.</li>
+        <li><span className="tutorial-item-icon"><PixelIcon color="#60a5fa" grid={['#   #', '## ##', '# # #', '#   #', ' ### ']} /></span><strong>Dir_mov</strong>: última dirección usada al moverse.</li>
+        <li><span className="tutorial-item-icon"><PixelIcon color="#a78bfa" grid={[' ### ', '#   #', '   # ', '  #  ', '     ', '  #  ', '  #  ']} /></span><strong>Puntaje</strong>: puntos acumulados del tanque.</li>
+      </ul>
+
       <h3>Reglas clave</h3>
       <ul className="tutorial-list">
         <li><span className="tutorial-item-icon"><PixelIcon color="#38bdf8" grid={['#####', '#   #', '#   #', '#   #', '#####']} /></span>Tanques personalizables: 2 a 6 jugadores.</li>

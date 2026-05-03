@@ -54,7 +54,7 @@ export const COMMAND_LOGOS: Record<CommandType, PixelLogo> = {
 }
 
 export const SCORE_STAT_ICONS = {
-  health: { color: '#ef4444', grid: [' ### ', '#####', ' ### ', ' ### ', ' # # '] },
+  health: { color: '#fcd34d', grid: [' ### ', '#   #', '#   #', '#   #', ' ### '] },
   kills: { color: '#ef4444', grid: ['#   #', ' # # ', '  #  ', ' # # ', '#   #'] },
   bombs: {
     color: '#ef4444',
@@ -63,13 +63,13 @@ export const SCORE_STAT_ICONS = {
   mines: { color: '#facc15', grid: ['  #  ', ' ### ', '#####', ' ### ', '  #  '] },
   rad: {
     color: '#4ade80',
-    grid: ['  #  ', ' # # ', '#   #', '  #  ', '  #  ', '  #  ', ' ### '],
+    grid: ['#####', '#   #', '### #', '#   #', '#####'],
   },
   radDir: { color: '#22d3ee', grid: [' ### ', '#   #', '# # #', '#   #', ' ### '] },
-  danoDir: { color: '#38bdf8', grid: ['  #  ', ' # # ', '  #  ', '  #  ', '  #  '] },
+  danoDir: { color: '#f87171', grid: ['#   #', '## ##', '# # #', '#   #', '#   #'] },
   dirMov: {
-    color: '#a78bfa',
-    grid: ['  #  ', ' ### ', '#####', ' ### ', '  #  ', '  #  ', '  #  '],
+    color: '#60a5fa',
+    grid: ['#   #', '## ##', '# # #', '#   #', ' ### '],
   },
-  score: { color: '#fcd34d', grid: [' ### ', ' # # ', ' ### ', '  #  ', '  #  '] },
+  score: { color: '#a78bfa', grid: [' ### ', '#   #', '   # ', '  #  ', '     ', '  #  ', '  #  '] },
 }

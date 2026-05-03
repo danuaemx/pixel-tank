@@ -48,6 +48,7 @@ type ProgramEditorScreenProps = {
   renderProgramField: (label: string, control: React.ReactNode, className?: string) => React.ReactNode
   onExportPrograms: () => void
   onImportPrograms: (text: string) => void
+  onClearProgram: () => void
   onBackToConfig: () => void
   onStartSimulation: () => void
   onBackToMenu: () => void
@@ -73,6 +74,7 @@ export function ProgramEditorScreen({
   renderProgramField,
   onExportPrograms,
   onImportPrograms,
+  onClearProgram,
   onBackToConfig,
   onStartSimulation,
   onBackToMenu,
@@ -158,18 +160,39 @@ export function ProgramEditorScreen({
           <div className="program-top-actions">
             <button className="pixel-btn program-icon-btn" title="Volver a configuración" aria-label="Volver a configuración" onClick={onBackToConfig}>
               <PixelIcon color="#064e3b" grid={NAV_ICONS.back} />
+              <span className="program-icon-label">Config</span>
             </button>
-            <button className="small-btn" type="button" title="Guardar tanque en TXT" aria-label="Guardar tanque en TXT" onClick={onExportPrograms}>
-              Guardar tanque TXT
+            <button
+              className="pixel-btn danger btn-with-icon"
+              type="button"
+              title="Limpiar solo este tanque"
+              aria-label="Limpiar solo este tanque"
+              onClick={onClearProgram}
+            >
+              <span className="btn-icon">
+                <PixelIcon color="#ffffff" grid={NAV_ICONS.cancel} />
+              </span>
+              Limpiar
             </button>
-            <button className="small-btn" type="button" title="Cargar tanque desde TXT" aria-label="Cargar tanque desde TXT" onClick={triggerImport}>
-              Cargar tanque TXT
+            <button className="small-btn btn-with-icon" type="button" title="Guardar tanque en TXT" aria-label="Guardar tanque en TXT" onClick={onExportPrograms}>
+              <span className="btn-icon">
+                <PixelIcon color="#1f2937" grid={NAV_ICONS.save} />
+              </span>
+              Guardar
             </button>
-            <button className="pixel-btn program-icon-btn" title="Iniciar simulación" aria-label="Iniciar simulación" onClick={onStartSimulation}>
+            <button className="small-btn btn-with-icon" type="button" title="Cargar tanque desde TXT" aria-label="Cargar tanque desde TXT" onClick={triggerImport}>
+              <span className="btn-icon">
+                <PixelIcon color="#1f2937" grid={NAV_ICONS.load} />
+              </span>
+              Cargar
+            </button>
+            <button className="pixel-btn program-icon-btn program-start-btn" title="Iniciar simulación" aria-label="Iniciar simulación" onClick={onStartSimulation}>
               <PixelIcon color="#064e3b" grid={NAV_ICONS.start} />
+              <span className="program-icon-label">Jugar</span>
             </button>
             <button className="pixel-btn program-icon-btn" title="Volver al menú" aria-label="Volver al menú" onClick={onBackToMenu}>
               <PixelIcon color="#064e3b" grid={NAV_ICONS.menu} />
+              <span className="program-icon-label">Menú</span>
             </button>
           </div>
 
@@ -213,57 +236,57 @@ export function ProgramEditorScreen({
         </div>
       </div>
 
-      <div className="tank-tabs">
-        {Array.from({ length: config.players }, (_, index) => {
-          const selected = index === selectedTank
-          return (
-            <button
-              key={`tab-${index + 1}`}
-              className={`tank-tab ${selected ? 'active' : ''}`}
-              onClick={() => setSelectedTank(index)}
-            >
-              T{index + 1}
-            </button>
-          )
-        })}
-      </div>
-
       <div className="editor-layout">
         <div className="palette">
-          <h3>Comandos</h3>
-          <ul>
-            {COMMAND_LIBRARY.map((item) => (
-              <li
-                key={item.type}
-                className="palette-item"
-                draggable
-                onDragStart={(event) => {
-                  event.dataTransfer.effectAllowed = 'copy'
-                  event.dataTransfer.setData('text/plain', item.type)
-                  setDragPayload({ kind: 'palette', commandType: item.type })
-                }}
-                onDragEnd={() => setDragPayload(null)}
+            <h3>Comandos</h3>
+            <ul>
+              {COMMAND_LIBRARY.map((item) => (
+                <li
+                  key={item.type}
+                  className="palette-item"
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.effectAllowed = 'copy'
+                    event.dataTransfer.setData('text/plain', item.type)
+                    setDragPayload({ kind: 'palette', commandType: item.type })
+                  }}
+                  onDragEnd={() => setDragPayload(null)}
+                >
+                  <div className="palette-header">
+                    <span className="palette-icon">
+                      <PixelIcon color={item.logo.color} grid={item.logo.grid} />
+                    </span>
+                    <span className="palette-title">{formatCommandTypeLabel(item.type)}</span>
+                  </div>
+                  <div className="palette-actions">
+                    <button
+                      className="small-btn palette-add-btn"
+                      type="button"
+                      title={`Agregar ${formatCommandTypeLabel(item.type)}`}
+                      aria-label={`Agregar ${formatCommandTypeLabel(item.type)}`}
+                      onClick={() => addCommandByClick(item.type)}
+                    >
+                      <PixelIcon color="#064e3b" grid={NAV_ICONS.add} />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+        </div>
+
+        <div className="tank-tabs">
+          {Array.from({ length: config.players }, (_, index) => {
+            const selected = index === selectedTank
+            return (
+              <button
+                key={`tab-${index + 1}`}
+                className={`tank-tab ${selected ? 'active' : ''}`}
+                onClick={() => setSelectedTank(index)}
               >
-                <div className="palette-header">
-                  <span className="palette-icon">
-                    <PixelIcon color={item.logo.color} grid={item.logo.grid} />
-                  </span>
-                  <span className="palette-title">{formatCommandTypeLabel(item.type)}</span>
-                </div>
-                <div className="palette-actions">
-                  <button
-                    className="small-btn palette-add-btn"
-                    type="button"
-                    title={`Agregar ${formatCommandTypeLabel(item.type)}`}
-                    aria-label={`Agregar ${formatCommandTypeLabel(item.type)}`}
-                    onClick={() => addCommandByClick(item.type)}
-                  >
-                    <PixelIcon color="#064e3b" grid={NAV_ICONS.add} />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+                T{index + 1}
+              </button>
+            )
+          })}
         </div>
 
         <div className="program-area" ref={programAreaRef}>

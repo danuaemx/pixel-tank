@@ -29,26 +29,32 @@ export function SummaryBar({
         <div className="summary-line">
           <span className="summary-chip" title="Ronda">
             <PixelIcon color="#fcd34d" grid={SUMMARY_ICONS.round} />
+            <span className="summary-chip-label">Ronda</span>
             <strong>{gameState.round}</strong>
           </span>
           <span className="summary-chip" title="Turno">
             <PixelIcon color="#38bdf8" grid={SUMMARY_ICONS.turn} />
+            <span className="summary-chip-label">Turno</span>
             <strong>{currentTurn}</strong>
           </span>
           <span className="summary-chip" title="Activos">
             <PixelIcon color="#ef4444" grid={SUMMARY_ICONS.alive} />
+            <span className="summary-chip-label">Activos</span>
             <strong>{aliveTanks}/{gameState.tanks.length}</strong>
           </span>
           <span className="summary-chip" title="Minas">
             <PixelIcon color="#facc15" grid={SUMMARY_ICONS.mines} />
+            <span className="summary-chip-label">Minas</span>
             <strong>{gameState.mines.length}</strong>
           </span>
           <span className="summary-chip" title="Estaciones">
             <PixelIcon color="#4ade80" grid={SUMMARY_ICONS.stations} />
+            <span className="summary-chip-label">Estaciones</span>
             <strong>{gameState.stations.length}</strong>
           </span>
           <span className="summary-chip" title="Líder">
             <PixelIcon color="#f472b6" grid={SUMMARY_ICONS.leader} />
+            <span className="summary-chip-label">Líder</span>
             {leader ? <span className="summary-dot" style={{ backgroundColor: leader.color }} /> : <span className="summary-dot" />}
             <strong>{leader ? getDisplayScore(leader) : '-'}</strong>
           </span>
@@ -63,6 +69,7 @@ export function SummaryBar({
             onClick={onToggleRunning}
           >
             <PixelIcon color="#064e3b" grid={running ? CONTROL_ICONS.auto : CONTROL_ICONS.manual} />
+            <span className="top-control-label">{running ? 'Automático' : 'Paso a paso'}</span>
           </button>
           <button
             className="pixel-btn top-control-btn"
@@ -72,12 +79,15 @@ export function SummaryBar({
             onClick={onRunSingleStep}
           >
             <PixelIcon color="#064e3b" grid={CONTROL_ICONS.step} />
+            <span className="top-control-label">Paso</span>
           </button>
           <button className="pixel-btn top-control-btn" title="Reiniciar simulación" aria-label="Reiniciar simulación" onClick={onRestart}>
             <PixelIcon color="#064e3b" grid={CONTROL_ICONS.restart} />
+            <span className="top-control-label">Reiniciar</span>
           </button>
           <button className="pixel-btn top-control-btn" title="Volver al menú principal" aria-label="Volver al menú principal" onClick={onBackToMenu}>
             <PixelIcon color="#064e3b" grid={CONTROL_ICONS.menu} />
+            <span className="top-control-label">Menú</span>
           </button>
           <div className="speed-control-top" title={`Velocidad: ${speedPercent}% (${gameState.config.tickMs}ms)`}>
             <span className="speed-control-label">Velocidad</span>
