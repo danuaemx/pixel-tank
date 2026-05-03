@@ -113,6 +113,11 @@ La carpeta [public/music](public/music) contiene las pistas usadas por la app:
 
 Durante la partida se rotan aleatoriamente `jugar_1`, `jugar_2` y `jugar_3`. Cuando la partida termina y hay ganador, la música de victoria usa `programar_happy_ganar.mp3`.
 
+## Créditos de música
+
+- "42 Monster RPG 2 music tracks" de Nooskewl Games, publicado en OpenGameArt. El propio autor pide un shout-out si se usan sus obras.
+- "5 Chiptunes Action" de Juhani Junkala, publicado en OpenGameArt bajo licencia CC0.
+
 ## Estructura principal
 
 - `src/main.tsx`: punto de entrada de React.

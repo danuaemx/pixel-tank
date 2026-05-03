@@ -27,6 +27,18 @@ export function CreditsScreen({ onBackToMenu }: CreditsScreenProps) {
         <li><span className="tutorial-item-icon"><PixelIcon color="#60a5fa" grid={NAV_ICONS.load} /></span><strong>src/components/PixelIcon.tsx</strong>: conversión de cuadrículas pixeladas a iconos visuales.</li>
       </ul>
 
+      <h3>Música</h3>
+      <ul className="tutorial-list">
+        <li>
+          <span className="tutorial-item-icon"><PixelIcon color="#fcd34d" grid={NAV_ICONS.save} /></span>
+          <strong>"42 Monster RPG 2 music tracks"</strong>: colección de Nooskewl Games publicada en OpenGameArt. El autor indica que agradece un saludo si se usan sus obras, y las pistas se redistribuyen aquí como parte del proyecto.
+        </li>
+        <li>
+          <span className="tutorial-item-icon"><PixelIcon color="#22d3ee" grid={NAV_ICONS.load} /></span>
+          <strong>"5 Chiptunes Action"</strong>: colección de Juhani Junkala publicada en OpenGameArt bajo licencia CC0.
+        </li>
+      </ul>
+
 
       <div className="inline-actions">
         <button className="pixel-btn btn-with-icon" onClick={onBackToMenu}>
