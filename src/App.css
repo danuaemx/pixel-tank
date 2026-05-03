@@ -82,6 +82,85 @@ textarea {
   gap: 16px;
 }
 
+.boot-screen {
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  width: min(100%, 760px);
+  min-height: 520px;
+  background:
+    radial-gradient(circle at top, rgba(34, 197, 94, 0.18), transparent 42%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(17, 24, 39, 0.96));
+  border-color: #0f172a;
+  box-shadow:
+    inset -4px -4px 0 rgba(0, 0, 0, 0.55),
+    inset 4px 4px 0 rgba(255, 255, 255, 0.12),
+    0 16px 0 rgba(0, 0, 0, 0.25);
+}
+
+.boot-hero {
+  width: 100%;
+}
+
+.boot-kicker {
+  color: #86efac;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.boot-title {
+  margin-bottom: 12px;
+  font-size: clamp(2.5rem, 6vw, 4.2rem);
+}
+
+.boot-subtitle {
+  max-width: 52ch;
+  margin: 0 auto;
+  color: #cbd5e1;
+}
+
+.boot-progress-shell {
+  width: min(100%, 520px);
+  height: 22px;
+  border: 4px solid #000;
+  background: #0f172a;
+  box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.45), inset 3px 3px 0 rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.boot-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #bef264);
+  transition: width 0.2s ease-out;
+  box-shadow: 0 0 14px rgba(190, 242, 100, 0.45);
+}
+
+.boot-progress-meta {
+  width: min(100%, 520px);
+  display: flex;
+  justify-content: space-between;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+}
+
+.boot-actions {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.boot-start-btn {
+  min-width: 220px;
+}
+
+.boot-start-btn:disabled {
+  cursor: not-allowed;
+}
+
 .menu-screen.panel,
 .config-screen.panel,
 .editor-screen.panel,

@@ -7,6 +7,7 @@ import {
   DEFAULT_UI_FONT_SIZE,
   NAV_ICONS,
 } from './app/_const'
+import { preloadBootAssets } from './app/boot-assets'
 import type { DragPayload, MenuConfirmSource, Screen } from './app/types'
 import {
   getConditionForEditor,
@@ -46,9 +47,12 @@ import {
 
 function App() {
   const GAME_THEMES: MusicTheme[] = ['game', 'quick', 'victory']
+  type AppScreen = Screen | 'loading'
 
   // Estado principal de la aplicación: pantalla activa, configuración y sesión de juego.
-  const [screen, setScreen] = useState<Screen>('menu')
+  const [screen, setScreen] = useState<AppScreen>('loading')
+  const [bootProgress, setBootProgress] = useState({ loaded: 0, total: 1 })
+  const [bootReady, setBootReady] = useState(false)
   const [config, setConfig] = useState<GameConfig>(() => createDefaultConfig())
   const [programs, setPrograms] = useState<Command[][]>(() => {
     const defaults = createDefaultConfig()
@@ -94,6 +98,10 @@ function App() {
   const currentProgram = programs[selectedTank] ?? []
   const programAreaRef = useRef<HTMLDivElement | null>(null)
   const screenMusicTheme = (() => {
+    if (screen === 'loading') {
+      return null
+    }
+
     if (screen === 'menu') {
       return 'menu'
     }
@@ -118,10 +126,27 @@ function App() {
     return GAME_THEMES[index] ?? 'game'
   }
 
-  const startScreenMusic = (theme: typeof screenMusicTheme): void => {
+  const startScreenMusic = (theme: MusicTheme): void => {
     chiptuneAudio.unlockAudio()
     chiptuneAudio.startMusic(theme)
   }
+
+  useEffect(() => {
+    let cancelled = false
+
+    void preloadBootAssets((progress) => {
+      if (cancelled) {
+        return
+      }
+
+      setBootProgress(progress)
+      setBootReady(progress.loaded >= progress.total)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // Efectos globales: audio, cierre de pestaña, música y sincronización del juego.
   useEffect(() => {
@@ -149,11 +174,15 @@ function App() {
   }, [screen])
 
   useEffect(() => {
+    if (!screenMusicTheme) {
+      return
+    }
+
     startScreenMusic(screenMusicTheme)
   }, [screenMusicTheme])
 
   useEffect(() => {
-    if (chiptuneAudio.isAudioUnlocked()) {
+    if (chiptuneAudio.isAudioUnlocked() || !screenMusicTheme) {
       return
     }
 
@@ -701,9 +730,44 @@ function App() {
     )
   }
 
+  const renderLoading = () => {
+    const progressPercent =
+      bootProgress.total > 0 ? Math.round((bootProgress.loaded * 100) / bootProgress.total) : 0
+
+    return (
+      <section className="panel boot-screen">
+        <div className="boot-hero">
+          <p className="boot-kicker">Preparando batalla</p>
+          <h1 className="title boot-title">Tanques Game</h1>
+          <p className="subtitle boot-subtitle">
+            Cargando cursores, sonidos y texturas antes de entrar al menú.
+          </p>
+        </div>
+
+        <div className="boot-progress-shell" aria-label="Progreso de carga de recursos">
+          <div className="boot-progress-fill" style={{ width: `${progressPercent}%` }} aria-hidden="true" />
+        </div>
+
+        <div className="boot-progress-meta">
+          <span>{progressPercent}%</span>
+          <span>
+            {bootProgress.loaded}/{bootProgress.total} recursos
+          </span>
+        </div>
+
+        <div className="boot-actions">
+          <button className="pixel-btn boot-start-btn" onClick={() => setScreen('menu')} disabled={!bootReady}>
+            {bootReady ? 'Iniciar' : 'Cargando...'}
+          </button>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <>
       <main className="app-shell">
+        {screen === 'loading' && renderLoading()}
         {screen === 'menu' && renderMenu()}
         {screen === 'tutorial' && renderTutorial()}
         {screen === 'credits' && renderCredits()}
