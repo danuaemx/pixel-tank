@@ -14,9 +14,11 @@ import {
   TANK_COLORS,
   MIN_SHOT_RANGE,
   MAX_SHOT_RANGE,
+  MIN_RADAR_RANGE,
+  MAX_RADAR_RANGE,
 } from './_const'
 import { cellKey, clamp, createId, pickRandomFreeCell } from './utils'
-import type { Command, CommandType, GameConfig, GameState, Station, Tank } from './types'
+import type { Command, CommandType, CompareOperator, Direction, GameConfig, GameState, Station, Tank } from './types'
 
 export function createCommandTemplate(type: CommandType): Command {
   switch (type) {
@@ -55,61 +57,145 @@ export function createDefaultConfig(): GameConfig {
     stationCount: 2,
     tickMs: 700,
     shotRange: 3,
+    radarRange: 5,
   }
 }
 
 function buildProgram(variant: number): Command[] {
+  const buildMover = (dir: Direction): Command => ({
+    id: createId('cmd'),
+    type: 'MOVER',
+    dir,
+  })
+
+  const buildDisparar = (dir: Direction): Command => ({
+    id: createId('cmd'),
+    type: 'DISPARAR',
+    dir,
+    dirSource: 'VAL',
+  })
+
+  const buildBomba = (dir: Direction, dist: number): Command => ({
+    id: createId('cmd'),
+    type: 'BOMBA',
+    dir,
+    dirSource: 'VAL',
+    dist,
+    distSource: 'VAL',
+  })
+
+  const buildMina = (): Command => ({
+    id: createId('cmd'),
+    type: 'COLOCAR_MINA',
+  })
+
+  const buildEspera = (): Command => ({
+    id: createId('cmd'),
+    type: 'ESPERA',
+  })
+
+  const buildIf = (
+    dir: Direction,
+    operator: CompareOperator,
+    value: number,
+    action: Command
+  ): Command => ({
+    id: createId('cmd'),
+    type: 'IF',
+    condition: {
+      kind: 'REGISTER_COMPARE',
+      register: 'RAD',
+      operator,
+      value,
+      dir,
+    },
+    action: {
+      type: action.type,
+      dir: action.dir,
+      dirSource: action.dirSource,
+      dist: action.dist,
+      distSource: action.distSource,
+    },
+  })
+
   if (variant === 0) {
-    const radar = createCommandTemplate('RAD')
-    radar.dir = 'N'
-
-    const conditionIf = createCommandTemplate('IF')
-    conditionIf.condition = { kind: 'REGISTER_COMPARE', register: 'RAD', operator: '<', value: 0, dir: 'N' }
-    conditionIf.action = { type: 'DISPARAR', dir: 'N', dirSource: 'VAL' }
-
-    const move = createCommandTemplate('MOVER')
-    move.dir = 'E'
-
-    return [radar, conditionIf, move]
+    return [
+      buildMover('N'),
+      buildIf('E', '<', -1, buildMina()),
+      buildDisparar('S'),
+      buildBomba('O', 3),
+      buildMina(),
+      buildEspera(),
+      buildMover('E'),
+      buildIf('N', '>', 0, buildDisparar('N')),
+      buildMover('S'),
+      buildIf('S', '=', -2, buildMover('O')),
+      buildDisparar('O'),
+      buildMover('O'),
+      buildBomba('E', 2),
+      buildEspera(),
+      buildMover('N'),
+    ]
   }
 
   if (variant === 1) {
-    const mine = createCommandTemplate('COLOCAR_MINA')
-
-    const move = createCommandTemplate('MOVER')
-    move.dir = 'S'
-
-    const radar = createCommandTemplate('RAD')
-    radar.dir = 'E'
-
-    const shoot = createCommandTemplate('DISPARAR')
-    shoot.dir = 'E'
-
-    return [mine, move, radar, shoot]
+    return [
+      buildMover('S'),
+      buildIf('O', '<', -2, buildMover('S')),
+      buildDisparar('N'),
+      buildBomba('E', 3),
+      buildMina(),
+      buildEspera(),
+      buildMover('O'),
+      buildIf('S', '>', 0, buildDisparar('S')),
+      buildMover('N'),
+      buildIf('N', '=', -1, buildMina()),
+      buildDisparar('E'),
+      buildMover('E'),
+      buildBomba('O', 2),
+      buildEspera(),
+      buildMover('S'),
+    ]
   }
 
   if (variant === 2) {
-    const ifDamaged = createCommandTemplate('IF')
-    ifDamaged.condition = { kind: 'DAÑO' }
-    ifDamaged.action = { type: 'BOMBA', dir: 'O', dirSource: 'VAL', dist: 3, distSource: 'VAL' }
-
-    const move = createCommandTemplate('MOVER')
-    move.dir = 'N'
-
-    return [ifDamaged, move]
+    return [
+      buildMover('E'),
+      buildIf('S', '<', -1, buildMina()),
+      buildDisparar('O'),
+      buildBomba('N', 2),
+      buildMina(),
+      buildEspera(),
+      buildMover('N'),
+      buildIf('E', '>', 0, buildDisparar('E')),
+      buildMover('O'),
+      buildIf('O', '=', -2, buildMover('N')),
+      buildDisparar('N'),
+      buildMover('S'),
+      buildBomba('S', 3),
+      buildEspera(),
+      buildMover('E'),
+    ]
   }
 
-  const radar = createCommandTemplate('RAD')
-  radar.dir = 'S'
-
-  const ifPositive = createCommandTemplate('IF')
-  ifPositive.condition = { kind: 'REGISTER_COMPARE', register: 'RAD', operator: '>', value: 0, dir: 'S' }
-  ifPositive.action = { type: 'MOVER', dir: 'S' }
-
-  const shoot = createCommandTemplate('DISPARAR')
-  shoot.dir = 'S'
-
-  return [radar, ifPositive, shoot]
+  // variant === 3
+  return [
+    buildMover('O'),
+    buildIf('N', '<', -2, buildMover('O')),
+    buildDisparar('E'),
+    buildBomba('S', 3),
+    buildMina(),
+    buildEspera(),
+    buildMover('S'),
+    buildIf('O', '>', 0, buildDisparar('O')),
+    buildMover('E'),
+    buildIf('E', '=', -1, buildMina()),
+    buildDisparar('S'),
+    buildMover('N'),
+    buildBomba('N', 2),
+    buildEspera(),
+    buildMover('O'),
+  ]
 }
 
 export function createDefaultPrograms(players: number): Command[][] {
@@ -218,6 +304,7 @@ export function createInitialGameState(config: GameConfig, programs: Command[][]
     bombsPerTank: clamp(config.bombsPerTank, MIN_BOMBS_PER_TANK, MAX_BOMBS_PER_TANK),
     minesPerTank: clamp(config.minesPerTank, MIN_MINES_PER_TANK, MAX_MINES_PER_TANK),
     shotRange: clamp(config.shotRange ?? 3, MIN_SHOT_RANGE, MAX_SHOT_RANGE),
+    radarRange: clamp(config.radarRange ?? 5, MIN_RADAR_RANGE, MAX_RADAR_RANGE),
   }
 
   const readyPrograms = normalizeProgramsForPlayers(programs, safeConfig.players)

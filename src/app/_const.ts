@@ -103,10 +103,10 @@ export const CONDITION_OPTIONS: Array<{ kind: ConditionKind; label: string }> = 
   { kind: 'TRUE', label: 'TRUE' },
   { kind: 'REGISTER_COMPARE', label: 'REGISTRO OP VALOR' },
   { kind: 'DAÑO', label: 'DAÑO_DIR != NONE' },
-  { kind: 'DIR_MOV_EQ', label: 'DIR_MOV == dir' },
+  { kind: 'DIR_MOV_EQ', label: 'DIR_MOV = dir' },
 ]
 
 export const REGISTER_OPTIONS: NumericRegister[] = ['RAD', 'SALUD']
-export const COMPARE_OPERATORS: CompareOperator[] = ['<=', '<', '>', '>=', '==']
+export const COMPARE_OPERATORS: CompareOperator[] = ['<', '>', '=']
 export const DIST_SOURCE_OPTIONS: BombDistanceSource[] = ['VAL', 'RAD', 'SALUD']
 export const SHOOT_DIRECTION_OPTIONS: Array<Direction | 'RAD_DIR'> = [...DIRECTIONS, 'RAD_DIR']

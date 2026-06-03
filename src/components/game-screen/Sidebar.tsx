@@ -101,7 +101,7 @@ export function Sidebar({ gameState, animatePassiveLines, animatedLineByTankId }
                       ) : (
                         tank.program.map((cmd, idx) => {
                           let start = Math.max(0, activeLine - 2)
-                          let end = Math.min(tank.program.length - 1, start + 4)
+                          const end = Math.min(tank.program.length - 1, start + 4)
                           if (end - start < 4) {
                             start = Math.max(0, end - 4)
                           }

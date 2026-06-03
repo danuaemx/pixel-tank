@@ -401,7 +401,7 @@ function executeTankTurn(state: GameState, tankIndex: number): void {
     return
   }
 
-  let passiveCount = 0
+  const passiveCount = 0
   let didAction = false
   let safetyCounter = 0
   const executionTrace: number[] = []

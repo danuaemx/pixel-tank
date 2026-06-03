@@ -37,6 +37,8 @@ import {
   MIN_MINES_PER_TANK,
   MIN_SHOT_RANGE,
   MAX_SHOT_RANGE,
+  MIN_RADAR_RANGE,
+  MAX_RADAR_RANGE,
   normalizeProgramsForPlayers,
   parseProgramsFromText,
   serializeProgramsToText,
@@ -341,6 +343,11 @@ function App() {
   const updateShotRange = (value: number): void => {
     const shotRange = Math.min(MAX_SHOT_RANGE, Math.max(MIN_SHOT_RANGE, value))
     setConfig((previous) => ({ ...previous, shotRange }))
+  }
+
+  const updateRadarRange = (value: number): void => {
+    const radarRange = Math.min(MAX_RADAR_RANGE, Math.max(MIN_RADAR_RANGE, value))
+    setConfig((previous) => ({ ...previous, radarRange }))
   }
 
   const updateUiFontSize = (value: number): void => {
@@ -689,6 +696,7 @@ function App() {
         updateBombsPerTank={updateBombsPerTank}
         updateMinesPerTank={updateMinesPerTank}
         updateShotRange={updateShotRange}
+        updateRadarRange={updateRadarRange}
         updateUiFontSize={updateUiFontSize}
         updateMasterVolume={updateMasterVolume}
         applyDefaultSetup={applyDefaultSetup}

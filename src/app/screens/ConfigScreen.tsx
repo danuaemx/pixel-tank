@@ -24,6 +24,8 @@ import {
   MIN_PLAYERS,
   MIN_SHOT_RANGE,
   MAX_SHOT_RANGE,
+  MIN_RADAR_RANGE,
+  MAX_RADAR_RANGE,
 } from '../../game'
 import type { GameConfig } from '../../game'
 
@@ -44,6 +46,7 @@ type ConfigScreenProps = {
   updateBombsPerTank: (value: number) => void
   updateMinesPerTank: (value: number) => void
   updateShotRange: (value: number) => void
+  updateRadarRange: (value: number) => void
   updateUiFontSize: (value: number) => void
   updateMasterVolume: (value: number) => void
   applyDefaultSetup: () => void
@@ -63,6 +66,7 @@ export function ConfigScreen({
   updateBombsPerTank,
   updateMinesPerTank,
   updateShotRange,
+  updateRadarRange,
   updateUiFontSize,
   updateMasterVolume,
   applyDefaultSetup,
@@ -151,6 +155,17 @@ export function ConfigScreen({
               MAX_SHOT_RANGE,
               updateShotRange,
               'alcance de disparo',
+            )}
+          </label>
+
+          <label className="config-compact-setting">
+            Alcance de radar ({MIN_RADAR_RANGE}-{MAX_RADAR_RANGE})
+            {renderConfigStepper(
+              config.radarRange,
+              MIN_RADAR_RANGE,
+              MAX_RADAR_RANGE,
+              updateRadarRange,
+              'alcance de radar',
             )}
           </label>
         </div>

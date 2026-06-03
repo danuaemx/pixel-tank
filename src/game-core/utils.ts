@@ -60,15 +60,11 @@ function getNumericRegisterValue(tank: Tank, register: NumericRegister): number 
 
 function compareRegisterValues(left: number, operator: CompareOperator, right: number): boolean {
   switch (operator) {
-    case '<=':
-      return left <= right
     case '<':
       return left < right
     case '>':
       return left > right
-    case '>=':
-      return left >= right
-    case '==':
+    case '=':
     default:
       return left === right
   }
@@ -102,14 +98,14 @@ export function resolveCommandDirection(command: Command, tank: Tank): Direction
 
 export function getRadReading(state: GameState, tank: Tank, dir: Direction): number {
   const vector = DIR_VECTORS[dir]
-  const maxDistance = state.config.gridSize
+  const maxDistance = state.config.radarRange
 
   for (let distance = 1; distance <= maxDistance; distance += 1) {
     const x = tank.x + vector.x * distance
     const y = tank.y + vector.y * distance
 
     if (!inBounds(state.config.gridSize, x, y)) {
-      return 0
+      return -distance
     }
 
     const hasBlockingElement =
@@ -141,7 +137,7 @@ export function evaluateCondition(
       return true
     case 'REGISTER_COMPARE': {
       const register = safeCondition.register ?? 'RAD'
-      const operator = safeCondition.operator ?? '=='
+      const operator = safeCondition.operator ?? '='
       const comparedValue = safeCondition.value ?? 0
       
       let registerValue = 0
@@ -188,7 +184,7 @@ export function conditionToText(condition: Condition | undefined): string {
 
   if (safeCondition.kind === 'REGISTER_COMPARE') {
     const register = safeCondition.register ?? 'RAD'
-    const operator = safeCondition.operator ?? '=='
+    const operator = safeCondition.operator ?? '='
     const value = safeCondition.value ?? 0
     if (register === 'RAD' && safeCondition.dir) {
       return `RADAR(${safeCondition.dir}) ${operator} ${value}`
@@ -197,7 +193,7 @@ export function conditionToText(condition: Condition | undefined): string {
   }
 
   if (safeCondition.kind === 'DIR_MOV_EQ') {
-    return `DIR_MOV == ${safeCondition.dir ?? 'N'}`
+    return `DIR_MOV = ${safeCondition.dir ?? 'N'}`
   }
 
   if (safeCondition.kind === 'DAÑO') {

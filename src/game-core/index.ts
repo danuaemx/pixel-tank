@@ -18,6 +18,8 @@ export {
   TANK_COLORS,
   MIN_SHOT_RANGE,
   MAX_SHOT_RANGE,
+  MIN_RADAR_RANGE,
+  MAX_RADAR_RANGE,
 } from './_const'
 export { advanceGame } from './engine'
 export { commandToText, getDisplayScore, isActionCommand } from './format'

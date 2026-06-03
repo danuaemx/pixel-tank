@@ -35,11 +35,12 @@ function parseCondition(text: string): Condition {
     return { kind: 'DAÑO' }
   }
 
-  if (normalized.startsWith('DIR_MOV == ')) {
-    return { kind: 'DIR_MOV_EQ', dir: parseDirectionToken(normalized.slice('DIR_MOV == '.length)) as 'N' | 'S' | 'E' | 'O' }
+  if (normalized.startsWith('DIR_MOV == ') || normalized.startsWith('DIR_MOV = ')) {
+    const prefix = normalized.startsWith('DIR_MOV == ') ? 'DIR_MOV == ' : 'DIR_MOV = '
+    return { kind: 'DIR_MOV_EQ', dir: parseDirectionToken(normalized.slice(prefix.length)) as 'N' | 'S' | 'E' | 'O' }
   }
 
-  const match = normalized.match(/^(RADAR\((N|S|E|O)\)|RAD|SALUD)\s*(<=|<|>|>=|==)\s*(-?\d+)$/)
+  const match = normalized.match(/^(RADAR\((N|S|E|O)\)|RAD|SALUD)\s*(<=|<|>|>=|==|=)\s*(-?\d+)$/)
   if (match) {
     const regToken = match[1]
     let register: NumericRegister = 'RAD'
@@ -52,10 +53,20 @@ function parseCondition(text: string): Condition {
       register = regToken as NumericRegister
     }
 
+    const operatorStr = match[3]
+    let operator: CompareOperator = '='
+    if (operatorStr === '==' || operatorStr === '=') {
+      operator = '='
+    } else if (operatorStr === '<=' || operatorStr === '<') {
+      operator = '<'
+    } else if (operatorStr === '>=' || operatorStr === '>') {
+      operator = '>'
+    }
+
     return {
       kind: 'REGISTER_COMPARE',
       register,
-      operator: match[3] as CompareOperator,
+      operator,
       value: Number(match[4]),
       dir,
     }

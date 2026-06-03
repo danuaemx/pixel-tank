@@ -34,7 +34,7 @@ export function TutorialScreen({ onBackToMenu }: TutorialScreenProps) {
         </li>
         <li>
           <span className="tutorial-item-icon"><GameIcon color={COMMAND_LOGOS.IF.color} icon={COMMAND_LOGOS.IF.icon} /></span>
-          <strong>If(cond):act</strong>: si falla, salta la siguiente línea. Cond usa operadores &lt;=, &lt;, &gt;, &gt;=, ==.
+          <strong>If(cond):act</strong>: si falla, salta la siguiente línea. Cond usa operadores &lt;, &gt;, =.
         </li>
       </ul>
 

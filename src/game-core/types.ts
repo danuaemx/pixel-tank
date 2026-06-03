@@ -13,7 +13,7 @@ export type CommandType =
   | 'ESPERA'
 
 export type NumericRegister = 'RAD' | 'SALUD'
-export type CompareOperator = '<=' | '<' | '>' | '>=' | '=='
+export type CompareOperator = '<' | '>' | '='
 export type BombDistanceSource = 'VAL' | NumericRegister
 export type ShootDirectionSource = 'VAL' | 'RAD_DIR'
 
@@ -132,6 +132,7 @@ export interface GameConfig {
   stationCount: number
   tickMs: number
   shotRange: number
+  radarRange: number
 }
 
 export interface GameState {
