@@ -1,3 +1,4 @@
+import { DIR_VECTORS } from './_const'
 import type {
   Command,
   CompareOperator,
@@ -99,18 +100,57 @@ export function resolveCommandDirection(command: Command, tank: Tank): Direction
   return command.dir ?? 'N'
 }
 
-export function evaluateCondition(condition: Condition | undefined, tank: Tank): boolean {
+export function getRadReading(state: GameState, tank: Tank, dir: Direction): number {
+  const vector = DIR_VECTORS[dir]
+  const maxDistance = state.config.gridSize
+
+  for (let distance = 1; distance <= maxDistance; distance += 1) {
+    const x = tank.x + vector.x * distance
+    const y = tank.y + vector.y * distance
+
+    if (!inBounds(state.config.gridSize, x, y)) {
+      return 0
+    }
+
+    const hasBlockingElement =
+      state.walls.has(cellKey(x, y)) ||
+      getMineAt(state, x, y) >= 0 ||
+      getTankAt(state, x, y, tank.id) >= 0
+
+    if (hasBlockingElement) {
+      return -distance
+    }
+
+    if (getStationAt(state, x, y) >= 0) {
+      return distance
+    }
+  }
+
+  return 0
+}
+
+export function evaluateCondition(
+  condition: Condition | undefined,
+  tank: Tank,
+  state?: GameState,
+): boolean {
   const safeCondition: Condition = condition ?? { kind: 'TRUE' }
 
   switch (safeCondition.kind) {
     case 'TRUE':
       return true
     case 'REGISTER_COMPARE': {
-      // Las condiciones de registro comparan el valor normalizado del registro elegido con el literal de la regla.
       const register = safeCondition.register ?? 'RAD'
       const operator = safeCondition.operator ?? '=='
       const comparedValue = safeCondition.value ?? 0
-      const registerValue = getNumericRegisterValue(tank, register)
+      
+      let registerValue = 0
+      if (register === 'RAD' && safeCondition.dir && state) {
+        registerValue = getRadReading(state, tank, safeCondition.dir)
+      } else {
+        registerValue = getNumericRegisterValue(tank, register)
+      }
+
       return compareRegisterValues(registerValue, operator, comparedValue)
     }
     case 'DAÑO':
@@ -150,6 +190,9 @@ export function conditionToText(condition: Condition | undefined): string {
     const register = safeCondition.register ?? 'RAD'
     const operator = safeCondition.operator ?? '=='
     const value = safeCondition.value ?? 0
+    if (register === 'RAD' && safeCondition.dir) {
+      return `RADAR(${safeCondition.dir}) ${operator} ${value}`
+    }
     return `${register} ${operator} ${value}`
   }
 

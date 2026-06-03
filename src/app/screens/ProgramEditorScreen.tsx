@@ -310,7 +310,6 @@ export function ProgramEditorScreen({
               const condition = getCondition(command)
               const bombDistSource = command.distSource ?? 'VAL'
               const ifDepth = Math.min(4, getIfDependencyDepth(currentProgram, index))
-              const closesPreviousIf = currentProgram[index - 1]?.type === 'IF'
 
               return (
                 <li
@@ -551,10 +550,37 @@ export function ProgramEditorScreen({
                                           ? current
                                           : createDefaultCondition('REGISTER_COMPARE')),
                                         register,
+                                        dir: undefined,
                                       }
                                     })
                                   }}
                                 />,
+                              )}
+
+                              {condition.register === 'RAD' && (
+                                renderProgramField(
+                                  'DIR',
+                                  <PixelSelect
+                                    title="Dir de Radar"
+                                    value={condition.dir ?? 'NONE'}
+                                    options={[
+                                      { value: 'NONE', label: 'General' },
+                                      ...DIRECTIONS.map((dir) => ({ value: dir, label: formatDirectionLabel(dir) })),
+                                    ]}
+                                    onChange={(value) => {
+                                      const dir = value === 'NONE' ? undefined : (value as Direction)
+                                      patchCommand(index, (next) => {
+                                        const current = getConditionForEditor(next.condition)
+                                        next.condition = {
+                                          ...(current.kind === 'REGISTER_COMPARE'
+                                            ? current
+                                            : createDefaultCondition('REGISTER_COMPARE')),
+                                          dir,
+                                        }
+                                      })
+                                    }}
+                                  />,
+                                )
                               )}
 
                               {renderProgramField(
@@ -630,17 +656,168 @@ export function ProgramEditorScreen({
                             )
                           )}
 
+                          {/* Nested Action Type Selector */}
+                          {renderProgramField(
+                            'Acción',
+                            <PixelSelect
+                              title="Acción a realizar"
+                              value={command.action?.type ?? 'ESPERA'}
+                              options={COMMAND_LIBRARY.filter(item => item.type !== 'IF').map((item) => ({
+                                value: item.type,
+                                label: formatCommandTypeLabel(item.type),
+                              }))}
+                              onChange={(selectedType) => {
+                                const nextType = selectedType as CommandType
+                                patchCommand(index, (next) => {
+                                  if (!next.action) {
+                                    next.action = { type: 'ESPERA' }
+                                  }
+                                  const reset = createCommandTemplate(nextType)
+                                  next.action.type = reset.type
+                                  next.action.dir = reset.dir
+                                  next.action.dirSource = reset.dirSource
+                                  next.action.dist = reset.dist
+                                  next.action.distSource = reset.distSource
+                                })
+                              }}
+                            />,
+                          )}
+
+                          {/* Nested Action Fields */}
+                          {command.action && (command.action.type === 'MOVER' || command.action.type === 'RAD') && (
+                            renderProgramField(
+                              'DIR',
+                              <PixelSelect
+                                title="Dirección"
+                                value={command.action.dir ?? 'N'}
+                                options={DIRECTIONS.map((dir) => ({ value: dir, label: formatDirectionLabel(dir) }))}
+                                onChange={(selectedDir) => {
+                                  const dir = selectedDir as Direction
+                                  patchCommand(index, (next) => {
+                                    if (next.action) next.action.dir = dir
+                                  })
+                                }}
+                              />,
+                            )
+                          )}
+
+                          {command.action && command.action.type === 'DISPARAR' && (
+                            renderProgramField(
+                              'DIR',
+                              <PixelSelect
+                                title="Dirección"
+                                value={command.action.dirSource === 'RAD_DIR' ? 'RAD_DIR' : command.action.dir ?? 'N'}
+                                options={SHOOT_DIRECTION_OPTIONS.map((option) => ({
+                                  value: option,
+                                  label: formatDirectionLabel(option),
+                                }))}
+                                onChange={(value) => {
+                                  const selected = value as Direction | 'RAD_DIR'
+                                  patchCommand(index, (next) => {
+                                    if (next.action) {
+                                      if (selected === 'RAD_DIR') {
+                                        next.action.dirSource = selected as ShootDirectionSource
+                                      } else {
+                                        next.action.dir = selected
+                                        next.action.dirSource = 'VAL'
+                                      }
+                                    }
+                                  })
+                                }}
+                              />,
+                            )
+                          )}
+
+                          {command.action && command.action.type === 'BOMBA' && (
+                            <>
+                              {renderProgramField(
+                                'DIR',
+                                <PixelSelect
+                                  title="Dirección"
+                                  value={command.action.dirSource === 'RAD_DIR' ? 'RAD_DIR' : command.action.dir ?? 'N'}
+                                  options={SHOOT_DIRECTION_OPTIONS.map((option) => ({
+                                    value: option,
+                                    label: formatDirectionLabel(option),
+                                  }))}
+                                  onChange={(value) => {
+                                    const selected = value as Direction | 'RAD_DIR'
+                                    patchCommand(index, (next) => {
+                                      if (next.action) {
+                                        if (selected === 'RAD_DIR') {
+                                          next.action.dirSource = selected as ShootDirectionSource
+                                        } else {
+                                          next.action.dir = selected
+                                          next.action.dirSource = 'VAL'
+                                        }
+                                      }
+                                    })
+                                  }}
+                                />,
+                              )}
+
+                              {renderProgramField(
+                                'Dist',
+                                <PixelSelect
+                                  title="Fuente de DIST"
+                                  value={command.action.distSource ?? 'VAL'}
+                                  options={DIST_SOURCE_OPTIONS.map((source) => ({
+                                    value: source,
+                                    label: source === 'VAL' ? 'Val' : source === 'RAD' ? '|Radar|' : 'Salud',
+                                  }))}
+                                  onChange={(value) => {
+                                    const distSource = value as BombDistanceSource
+                                    patchCommand(index, (next) => {
+                                      if (next.action) next.action.distSource = distSource
+                                    })
+                                  }}
+                                />,
+                              )}
+
+                              {(command.action.distSource ?? 'VAL') === 'VAL' && (
+                                renderProgramField(
+                                  'Val',
+                                  <div className="field-inline-control">
+                                    <input
+                                      className="symbol-input symbol-input-sm"
+                                      title="Dist"
+                                      type="number"
+                                      min={1}
+                                      max={config.gridSize}
+                                      value={command.action.dist ?? 2}
+                                      onChange={(event) => {
+                                        const parsed = Number(event.target.value)
+                                        const safeParsed = Number.isFinite(parsed) ? parsed : 1
+                                        const dist = Math.min(config.gridSize, Math.max(1, safeParsed))
+                                        patchCommand(index, (next) => {
+                                          if (next.action) next.action.dist = dist
+                                        })
+                                      }}
+                                    />
+                                    <button
+                                      className="small-btn field-quick-btn"
+                                      type="button"
+                                      title="Usar valor absoluto de Radar"
+                                      onClick={() => {
+                                        patchCommand(index, (next) => {
+                                          if (next.action) next.action.distSource = 'RAD'
+                                        })
+                                      }}
+                                    >
+                                      |RAD|
+                                    </button>
+                                  </div>,
+                                  'field-val',
+                                )
+                              )}
+                            </>
+                          )}
+
                         </>
                       )}
 
                     </div>
 
-                    {closesPreviousIf && (
-                      <div className="if-end-marker" aria-label="Fin if automático">
-                        <span className="if-end-line" />
-                        <span>Fin if</span>
-                      </div>
-                    )}
+
                   </div>
                 </li>
               )

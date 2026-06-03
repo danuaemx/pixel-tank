@@ -102,6 +102,7 @@ export function getConditionForEditor(condition: Condition | undefined): Conditi
       register: condition.register ?? 'RAD',
       operator: condition.operator ?? '>',
       value: condition.value ?? 0,
+      dir: condition.dir,
     }
   }
 

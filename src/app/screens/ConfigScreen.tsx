@@ -16,13 +16,11 @@ import {
   MAX_GRID_SIZE,
   MAX_MAX_ROUNDS,
   MAX_MINES_PER_TANK,
-  MAX_PASSIVE_LIMIT,
   MAX_PLAYERS,
   MIN_BOMBS_PER_TANK,
   MIN_GRID_SIZE,
   MIN_MAX_ROUNDS,
   MIN_MINES_PER_TANK,
-  MIN_PASSIVE_LIMIT,
   MIN_PLAYERS,
 } from '../../game'
 import type { GameConfig } from '../../game'
@@ -40,7 +38,6 @@ type ConfigScreenProps = {
   ) => React.ReactNode
   updatePlayers: (value: number) => void
   updateGridSize: (value: number) => void
-  updatePassiveLimit: (value: number) => void
   updateMaxRounds: (value: number) => void
   updateBombsPerTank: (value: number) => void
   updateMinesPerTank: (value: number) => void
@@ -59,7 +56,6 @@ export function ConfigScreen({
   renderConfigStepper,
   updatePlayers,
   updateGridSize,
-  updatePassiveLimit,
   updateMaxRounds,
   updateBombsPerTank,
   updateMinesPerTank,
@@ -109,16 +105,6 @@ export function ConfigScreen({
             {renderConfigStepper(config.gridSize, MIN_GRID_SIZE, MAX_GRID_SIZE, updateGridSize, 'tamaño del grid')}
           </label>
 
-          <label className="config-compact-setting">
-            Líneas pasivas permitidas
-            {renderConfigStepper(
-              config.passiveLimit,
-              MIN_PASSIVE_LIMIT,
-              MAX_PASSIVE_LIMIT,
-              updatePassiveLimit,
-              'líneas pasivas',
-            )}
-          </label>
 
           <label className="config-compact-setting">
             Número máximo de rondas ({MIN_MAX_ROUNDS}-{MAX_MAX_ROUNDS})

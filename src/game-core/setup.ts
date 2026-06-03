@@ -29,7 +29,12 @@ export function createCommandTemplate(type: CommandType): Command {
     case 'RAD':
       return { id: createId('cmd'), type, dir: 'N' }
     case 'IF':
-      return { id: createId('cmd'), type, condition: { kind: 'TRUE' } }
+      return {
+        id: createId('cmd'),
+        type,
+        condition: { kind: 'TRUE' },
+        action: { type: 'ESPERA' },
+      }
     case 'ESPERA':
     default:
       return { id: createId('cmd'), type: 'ESPERA' }
@@ -56,15 +61,13 @@ function buildProgram(variant: number): Command[] {
     radar.dir = 'N'
 
     const conditionIf = createCommandTemplate('IF')
-    conditionIf.condition = { kind: 'REGISTER_COMPARE', register: 'RAD', operator: '<', value: 0 }
-
-    const shoot = createCommandTemplate('DISPARAR')
-    shoot.dir = 'N'
+    conditionIf.condition = { kind: 'REGISTER_COMPARE', register: 'RAD', operator: '<', value: 0, dir: 'N' }
+    conditionIf.action = { type: 'DISPARAR', dir: 'N', dirSource: 'VAL' }
 
     const move = createCommandTemplate('MOVER')
     move.dir = 'E'
 
-    return [radar, conditionIf, shoot, move]
+    return [radar, conditionIf, move]
   }
 
   if (variant === 1) {
@@ -85,31 +88,25 @@ function buildProgram(variant: number): Command[] {
   if (variant === 2) {
     const ifDamaged = createCommandTemplate('IF')
     ifDamaged.condition = { kind: 'DAÑO' }
-
-    const bomb = createCommandTemplate('BOMBA')
-    bomb.dir = 'O'
-    bomb.dist = 3
-    bomb.distSource = 'VAL'
+    ifDamaged.action = { type: 'BOMBA', dir: 'O', dirSource: 'VAL', dist: 3, distSource: 'VAL' }
 
     const move = createCommandTemplate('MOVER')
     move.dir = 'N'
 
-    return [ifDamaged, bomb, move]
+    return [ifDamaged, move]
   }
 
   const radar = createCommandTemplate('RAD')
   radar.dir = 'S'
 
   const ifPositive = createCommandTemplate('IF')
-  ifPositive.condition = { kind: 'REGISTER_COMPARE', register: 'RAD', operator: '>', value: 0 }
-
-  const move = createCommandTemplate('MOVER')
-  move.dir = 'S'
+  ifPositive.condition = { kind: 'REGISTER_COMPARE', register: 'RAD', operator: '>', value: 0, dir: 'S' }
+  ifPositive.action = { type: 'MOVER', dir: 'S' }
 
   const shoot = createCommandTemplate('DISPARAR')
   shoot.dir = 'S'
 
-  return [radar, ifPositive, move, shoot]
+  return [radar, ifPositive, shoot]
 }
 
 export function createDefaultPrograms(players: number): Command[][] {

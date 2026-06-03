@@ -5,6 +5,7 @@ import {
   createId,
   evaluateCondition,
   getMineAt,
+  getRadReading,
   getStationAt,
   getTankAt,
   inBounds,
@@ -15,6 +16,7 @@ import {
   resolveCommandDirection,
 } from './utils'
 import type {
+  Command,
   Direction,
   EffectKind,
   GameState,
@@ -131,36 +133,6 @@ function damageStationsInArea(
       }
     }
   }
-}
-
-function getRadReading(state: GameState, tank: Tank, dir: Direction): number {
-  const vector = DIR_VECTORS[dir]
-  const maxDistance = state.config.gridSize
-
-  for (let distance = 1; distance <= maxDistance; distance += 1) {
-    const x = tank.x + vector.x * distance
-    const y = tank.y + vector.y * distance
-
-    if (!inBounds(state.config.gridSize, x, y)) {
-      return 0
-    }
-
-    const hasBlockingElement =
-      state.walls.has(cellKey(x, y)) ||
-      getMineAt(state, x, y) >= 0 ||
-      getTankAt(state, x, y, tank.id) >= 0
-
-    if (hasBlockingElement) {
-      // Un obstáculo devuelve distancia negativa: la dirección está ocupada antes de llegar a una estación.
-      return -distance
-    }
-
-    if (getStationAt(state, x, y) >= 0) {
-      return distance
-    }
-  }
-
-  return 0
 }
 
 function createOccupiedSet(state: GameState): Set<string> {
@@ -455,13 +427,57 @@ function executeTankTurn(state: GameState, tankIndex: number): void {
         tank.registers.RAD = getRadReading(state, tank, dir)
         tank.registers.RAD_DIR = dir
         tank.ip = nextIndex(tank.ip, program.length, 1)
-        passiveCount += 1
+        didAction = true
         break
       }
       case 'IF': {
-        const conditionResult = evaluateCondition(command.condition, tank)
-        tank.ip = nextIndex(tank.ip, program.length, conditionResult ? 1 : 2)
-        passiveCount += 1
+        const conditionResult = evaluateCondition(command.condition, tank, state)
+        if (conditionResult && command.action) {
+          switch (command.action.type) {
+            case 'MOVER': {
+              performMove(state, tankIndex, command.action.dir ?? 'N')
+              didAction = true
+              break
+            }
+            case 'DISPARAR': {
+              const shootDir = resolveCommandDirection(command.action as Command, tank)
+              performShoot(state, tankIndex, shootDir)
+              didAction = true
+              break
+            }
+            case 'COLOCAR_MINA': {
+              performMinePlacement(state, tankIndex)
+              didAction = true
+              break
+            }
+            case 'BOMBA': {
+              const bombDir = resolveCommandDirection(command.action as Command, tank)
+              const distance = resolveBombDistance(command.action as Command, tank, state.config.gridSize)
+              performBomb(state, tankIndex, bombDir, distance)
+              didAction = true
+              break
+            }
+            case 'RAD': {
+              const dir = command.action.dir ?? 'N'
+              tank.registers.RAD = getRadReading(state, tank, dir)
+              tank.registers.RAD_DIR = dir
+              didAction = true
+              break
+            }
+            case 'ESPERA':
+            default: {
+              tank.lastAction = 'ESPERA'
+              didAction = true
+              break
+            }
+          }
+        }
+        if (command.action) {
+          tank.ip = nextIndex(tank.ip, program.length, 1)
+        } else {
+          tank.ip = nextIndex(tank.ip, program.length, conditionResult ? 1 : 2)
+        }
+        didAction = true
         break
       }
       case 'MOVER': {

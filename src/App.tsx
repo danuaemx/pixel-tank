@@ -320,10 +320,6 @@ function App() {
     setConfig((previous) => ({ ...previous, gridSize }))
   }
 
-  const updatePassiveLimit = (value: number): void => {
-    const passiveLimit = Math.min(50, Math.max(0, value))
-    setConfig((previous) => ({ ...previous, passiveLimit }))
-  }
 
   const updateMaxRounds = (value: number): void => {
     const maxRounds = Math.min(MAX_MAX_ROUNDS, Math.max(MIN_MAX_ROUNDS, value))
@@ -414,13 +410,30 @@ function App() {
   const importProgramsFromText = (text: string): void => {
     try {
       const parsed = parseProgramsFromText(text, 1)
-      const nextProgram = parsed.programs[0] ?? []
+      const activePrograms = parsed.programs.filter((p) => p !== undefined)
 
-      setPrograms((previous) => {
-        const next = previous.map((program) => [...program])
-        next[selectedTank] = nextProgram
-        return next
-      })
+      if (activePrograms.length === 0) {
+        throw new Error('El archivo no contiene comandos válidos.')
+      }
+
+      if (activePrograms.length === 1) {
+        const nextProgram = activePrograms[0]
+        setPrograms((previous) => {
+          const next = previous.map((program) => [...program])
+          next[selectedTank] = nextProgram
+          return next
+        })
+      } else {
+        setPrograms((previous) => {
+          const next = previous.map((program) => [...program])
+          parsed.programs.forEach((program, index) => {
+            if (program && index < next.length) {
+              next[index] = program
+            }
+          })
+          return next
+        })
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo importar el archivo.'
       window.alert(message)
@@ -538,7 +551,7 @@ function App() {
     let depth = 0
 
     for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
-      if (program[cursor]?.type !== 'IF') {
+      if (program[cursor]?.type !== 'IF' || program[cursor]?.action !== undefined) {
         break
       }
 
@@ -665,7 +678,6 @@ function App() {
         renderConfigStepper={renderConfigStepper}
         updatePlayers={updatePlayers}
         updateGridSize={updateGridSize}
-        updatePassiveLimit={updatePassiveLimit}
         updateMaxRounds={updateMaxRounds}
         updateBombsPerTank={updateBombsPerTank}
         updateMinesPerTank={updateMinesPerTank}

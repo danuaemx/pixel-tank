@@ -31,14 +31,18 @@ export function commandToText(command: Command): string {
   }
 
   if (command.type === 'IF') {
-    return `IF(${conditionToText(command.condition)})`
+    const condText = conditionToText(command.condition)
+    if (command.action) {
+      return `IF(${condText}): ${commandToText({ ...command.action, id: '' })}`
+    }
+    return `IF(${condText})`
   }
 
   if (command.type === 'COLOCAR_MINA') {
-    return 'COLOCAR_MINA'
+    return 'MINA'
   }
 
-  return 'ESPERA'
+  return 'ESPERAR'
 }
 
 export function isActionCommand(type: CommandType): boolean {

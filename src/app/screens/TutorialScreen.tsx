@@ -32,7 +32,7 @@ export function TutorialScreen({ onBackToMenu }: TutorialScreenProps) {
         </li>
         <li>
           <span className="tutorial-item-icon"><PixelIcon color="#a78bfa" grid={[' ### ', '#   #', '   # ', '  #  ', '     ', '  #  ', '  #  ']} /></span>
-          <strong>If(cond)</strong>: si falla, salta la siguiente línea. Cond usa operadores &lt;=, &lt;, &gt;, &gt;=, ==.
+          <strong>If(cond):act</strong>: si falla, salta la siguiente línea. Cond usa operadores &lt;=, &lt;, &gt;, &gt;=, ==.
         </li>
       </ul>
 

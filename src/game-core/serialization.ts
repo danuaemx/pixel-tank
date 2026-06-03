@@ -1,10 +1,10 @@
 import { commandToText } from './format'
 import { createCommandTemplate } from './setup'
-import type { Command, CommandType, Condition } from './types'
+import type { Command, CommandType, Condition, Direction, CompareOperator, NumericRegister } from './types'
 
 type ParsedProgramFile = {
   players: number
-  programs: Command[][]
+  programs: (Command[] | undefined)[]
 }
 
 function normalizeProgramLine(line: string): string {
@@ -39,13 +39,25 @@ function parseCondition(text: string): Condition {
     return { kind: 'DIR_MOV_EQ', dir: parseDirectionToken(normalized.slice('DIR_MOV == '.length)) as 'N' | 'S' | 'E' | 'O' }
   }
 
-  const match = normalized.match(/^(RAD|SALUD)\s*(<=|<|>|>=|==)\s*(-?\d+)$/)
+  const match = normalized.match(/^(RADAR\((N|S|E|O)\)|RAD|SALUD)\s*(<=|<|>|>=|==)\s*(-?\d+)$/)
   if (match) {
+    const regToken = match[1]
+    let register: NumericRegister = 'RAD'
+    let dir: Direction | undefined = undefined
+
+    if (regToken.startsWith('RADAR')) {
+      register = 'RAD'
+      dir = parseDirectionToken(match[2]) as Direction
+    } else {
+      register = regToken as NumericRegister
+    }
+
     return {
       kind: 'REGISTER_COMPARE',
-      register: match[1] as 'RAD' | 'SALUD',
-      operator: match[2] as '<=' | '<' | '>' | '>=' | '==',
-      value: Number(match[3]),
+      register,
+      operator: match[3] as CompareOperator,
+      value: Number(match[4]),
+      dir,
     }
   }
 
@@ -55,11 +67,11 @@ function parseCondition(text: string): Condition {
 function parseCommandLine(line: string): Command {
   const normalized = normalizeProgramLine(line)
 
-  if (normalized === 'ESPERA') {
+  if (normalized === 'ESPERAR' || normalized === 'ESPERA') {
     return createCommandTemplate('ESPERA')
   }
 
-  if (normalized === 'COLOCAR_MINA') {
+  if (normalized === 'MINA' || normalized === 'COLOCAR_MINA') {
     return createCommandTemplate('COLOCAR_MINA')
   }
 
@@ -112,10 +124,29 @@ function parseCommandLine(line: string): Command {
     return command
   }
 
+  const inlineIfMatch = normalized.match(/^IF\((.+)\)\s*:\s*(.+)$/i)
+  if (inlineIfMatch) {
+    const command = createCommandTemplate('IF')
+    command.condition = parseCondition(inlineIfMatch[1])
+
+    const actionText = inlineIfMatch[2].trim()
+    const parsedAction = parseCommandLine(actionText)
+
+    command.action = {
+      type: parsedAction.type,
+      dir: parsedAction.dir,
+      dirSource: parsedAction.dirSource,
+      dist: parsedAction.dist,
+      distSource: parsedAction.distSource,
+    }
+    return command
+  }
+
   const ifMatch = normalized.match(/^IF\((.*)\)$/i)
   if (ifMatch) {
     const command = createCommandTemplate('IF')
     command.condition = parseCondition(ifMatch[1])
+    delete command.action
     return command
   }
 
@@ -123,6 +154,14 @@ function parseCommandLine(line: string): Command {
 }
 
 export function serializeProgramsToText(programs: Command[][], players: number): string {
+  if (programs.length === 1) {
+    const lines: string[] = []
+    programs[0].forEach((command) => {
+      lines.push(commandToText(command))
+    })
+    return lines.join('\n').trimEnd() + '\n'
+  }
+
   const lines: string[] = [`JUGADORES ${players}`]
 
   programs.forEach((program, index) => {
@@ -139,7 +178,7 @@ export function serializeProgramsToText(programs: Command[][], players: number):
 export function parseProgramsFromText(text: string, fallbackPlayers: number): ParsedProgramFile {
   const lines = text.split(/\r?\n/)
   let players = fallbackPlayers
-  const programs: Command[][] = []
+  const programs: (Command[] | undefined)[] = []
   let currentProgram: Command[] | null = null
 
   for (let rawLineIndex = 0; rawLineIndex < lines.length; rawLineIndex += 1) {
@@ -158,13 +197,15 @@ export function parseProgramsFromText(text: string, fallbackPlayers: number): Pa
 
     const tankMatch = line.match(/^TANQUE\s+(\d+)$/i)
     if (tankMatch) {
+      const tankIndex = Number(tankMatch[1]) - 1
       currentProgram = []
-      programs.push(currentProgram)
+      programs[tankIndex] = currentProgram
       continue
     }
 
     if (!currentProgram) {
-      throw new Error(`La rutina debe comenzar con una sección TANQUE. Línea ${rawLineIndex + 1}.`)
+      currentProgram = []
+      programs[0] = currentProgram
     }
 
     currentProgram.push(parseCommandLine(line))

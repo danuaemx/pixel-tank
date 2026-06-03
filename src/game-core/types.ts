@@ -49,6 +49,13 @@ export interface Command {
   dist?: number
   distSource?: BombDistanceSource
   condition?: Condition
+  action?: {
+    type: CommandType
+    dir?: Direction
+    dirSource?: ShootDirectionSource
+    dist?: number
+    distSource?: BombDistanceSource
+  }
 }
 
 export interface TankRegisters {
