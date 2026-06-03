@@ -1,6 +1,6 @@
 import { cellKey } from '../../game'
 import { getPublicAssetUrl } from '../../app/utils'
-import { PixelIcon } from '../PixelIcon'
+import { GameIcon } from '../GameIcon'
 import { COMMAND_LOGOS } from './_const'
 import { getTankDirection } from './helpers'
 import type { BoardProps } from './types'
@@ -54,9 +54,9 @@ export function BoardView({ gameState, boardInfo }: BoardProps) {
               {tank && (
                 <>
                   <div
-                    className={`tile-tank ${isActingTank ? 'is-acting' : ''}`}
-                    data-dir={getTankDirection(tank)}
-                    style={{ '--tank-color': tank.color } as React.CSSProperties}
+                     className={`tile-tank ${isActingTank ? 'is-acting' : ''}`}
+                     data-dir={getTankDirection(tank)}
+                     style={{ '--tank-color': tank.color } as React.CSSProperties}
                   >
                     <div className="tank-turret" />
                     <div className="tank-barrel" />
@@ -64,7 +64,7 @@ export function BoardView({ gameState, boardInfo }: BoardProps) {
                   </div>
                   {isActingTank && actingLogo && (
                     <div className="tank-action-logo" title={tank.lastAction}>
-                      <PixelIcon color={actingLogo.color} grid={actingLogo.grid} />
+                      <GameIcon color={actingLogo.color} icon={actingLogo.icon} />
                     </div>
                   )}
                 </>

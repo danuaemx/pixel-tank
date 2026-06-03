@@ -14,7 +14,7 @@ import {
   type NumericRegister,
   type ShootDirectionSource,
 } from '../../game'
-import { PixelIcon } from '../../components/PixelIcon'
+import { GameIcon } from '../../components/GameIcon'
 import {
   COMMAND_LIBRARY,
   COMPARE_OPERATORS,
@@ -159,7 +159,7 @@ export function ProgramEditorScreen({
         <div className="program-top-controls">
           <div className="program-top-actions">
             <button className="pixel-btn program-icon-btn" title="Volver a configuración" aria-label="Volver a configuración" onClick={onBackToConfig}>
-              <PixelIcon color="#064e3b" grid={NAV_ICONS.back} />
+              <GameIcon color="#064e3b" icon={NAV_ICONS.back} />
               <span className="program-icon-label">Config</span>
             </button>
             <button
@@ -170,28 +170,28 @@ export function ProgramEditorScreen({
               onClick={onClearProgram}
             >
               <span className="btn-icon">
-                <PixelIcon color="#ffffff" grid={NAV_ICONS.cancel} />
+                <GameIcon color="#ffffff" icon={NAV_ICONS.cancel} />
               </span>
               Limpiar
             </button>
             <button className="small-btn btn-with-icon" type="button" title="Guardar tanque en TXT" aria-label="Guardar tanque en TXT" onClick={onExportPrograms}>
               <span className="btn-icon">
-                <PixelIcon color="#1f2937" grid={NAV_ICONS.save} />
+                <GameIcon color="#1f2937" icon={NAV_ICONS.save} />
               </span>
               Guardar
             </button>
             <button className="small-btn btn-with-icon" type="button" title="Cargar tanque desde TXT" aria-label="Cargar tanque desde TXT" onClick={triggerImport}>
               <span className="btn-icon">
-                <PixelIcon color="#1f2937" grid={NAV_ICONS.load} />
+                <GameIcon color="#1f2937" icon={NAV_ICONS.load} />
               </span>
               Cargar
             </button>
             <button className="pixel-btn program-icon-btn program-start-btn" title="Iniciar simulación" aria-label="Iniciar simulación" onClick={onStartSimulation}>
-              <PixelIcon color="#064e3b" grid={NAV_ICONS.start} />
+              <GameIcon color="#064e3b" icon={NAV_ICONS.start} />
               <span className="program-icon-label">Jugar</span>
             </button>
             <button className="pixel-btn program-icon-btn" title="Volver al menú" aria-label="Volver al menú" onClick={onBackToMenu}>
-              <PixelIcon color="#064e3b" grid={NAV_ICONS.menu} />
+              <GameIcon color="#064e3b" icon={NAV_ICONS.menu} />
               <span className="program-icon-label">Menú</span>
             </button>
           </div>
@@ -230,7 +230,7 @@ export function ProgramEditorScreen({
               <span className="tips-toggle-thumb" />
             </span>
             <span className="tips-toggle-icon">
-              <PixelIcon color={showProgramTips ? '#fcd34d' : '#94a3b8'} grid={NAV_ICONS.tips} />
+              <GameIcon color={showProgramTips ? '#fcd34d' : '#94a3b8'} icon={NAV_ICONS.tips} />
             </span>
           </label>
         </div>
@@ -254,7 +254,7 @@ export function ProgramEditorScreen({
                 >
                   <div className="palette-header">
                     <span className="palette-icon">
-                      <PixelIcon color={item.logo.color} grid={item.logo.grid} />
+                      <GameIcon color={item.logo.color} icon={item.logo.icon} />
                     </span>
                     <span className="palette-title">{formatCommandTypeLabel(item.type)}</span>
                   </div>
@@ -266,7 +266,7 @@ export function ProgramEditorScreen({
                       aria-label={`Agregar ${formatCommandTypeLabel(item.type)}`}
                       onClick={() => addCommandByClick(item.type)}
                     >
-                      <PixelIcon color="#064e3b" grid={NAV_ICONS.add} />
+                      <GameIcon color="#064e3b" icon={NAV_ICONS.add} />
                     </button>
                   </div>
                 </li>

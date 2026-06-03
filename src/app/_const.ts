@@ -1,4 +1,21 @@
+import type { ElementType } from 'react'
 import { DIRECTIONS } from '../game'
+import { COMMAND_LOGOS } from '../components/game-screen/_const'
+import {
+  IconBolt,
+  IconSettings,
+  IconCode,
+  IconBook,
+  IconStar,
+  IconPlus,
+  IconArrowLeft,
+  IconDeviceFloppy,
+  IconFolderDown,
+  IconX,
+  IconRefresh,
+  IconMenu2,
+  IconBulb,
+} from '@tabler/icons-react'
 import type {
   BombDistanceSource,
   CommandType,
@@ -19,20 +36,20 @@ export const MASTER_VOLUME_DISPLAY_REFERENCE = 315
 export const MASTER_VOLUME_DISPLAY_MAX = 60
 
 export const NAV_ICONS = {
-  quick: ['#    ', '##   ', '###  ', '##   ', '#    '],
-  config: [' ### ', '# # #', ' ### ', '# # #', ' ### '],
-  program: ['#####', '#   #', '#####', '#   #', '#####'],
-  tutorial: ['#### ', '#   #', '#### ', '#   #', '#   #'],
-  credits: ['  #  ', '# # #', ' ### ', '# # #', '  #  '],
-  add: ['  #  ', '  #  ', '#####', '  #  ', '  #  '],
-  back: [' #    ', '##    ', '##### ', '##    ', ' #    '],
-  save: ['#####', '#   #', '# # #', '#   #', '#####'],
-  load: ['#### ', '#   #', '###  ', '# #  ', '###  '],
-  cancel: ['#   #', ' # # ', '  #  ', ' # # ', '#   #'],
-  restart: [' ### ', '#   #', '## ##', '#   #', ' ### '],
-  menu: ['#####', '# # #', '#   #', '# # #', '#####'],
-  start: ['#    ', '##   ', '###  ', '##   ', '#    '],
-  tips: ['  #  ', ' ### ', '#####', ' ### ', '  #  '],
+  quick: IconBolt,
+  config: IconSettings,
+  program: IconCode,
+  tutorial: IconBook,
+  credits: IconStar,
+  add: IconPlus,
+  back: IconArrowLeft,
+  save: IconDeviceFloppy,
+  load: IconFolderDown,
+  cancel: IconX,
+  restart: IconRefresh,
+  menu: IconMenu2,
+  start: IconBolt,
+  tips: IconBulb,
 }
 
 export type CommandLibraryItem = {
@@ -40,7 +57,7 @@ export type CommandLibraryItem = {
   desc: string
   logo: {
     color: string
-    grid: string[]
+    icon: ElementType
   }
 }
 
@@ -48,58 +65,37 @@ export const COMMAND_LIBRARY: CommandLibraryItem[] = [
   {
     type: 'MOVER',
     desc: 'Mueve casilla en dirección.',
-    logo: {
-      color: '#38bdf8',
-      grid: ['  #  ', ' ### ', '#####', ' ### ', '  #  ', '  #  ', '  #  '],
-    },
+    logo: COMMAND_LOGOS.MOVER,
   },
   {
     type: 'DISPARAR',
     desc: 'Ataque instantáneo línea recta.',
-    logo: {
-      color: '#f87171',
-      grid: [' ### ', '#####', ' # # ', ' # # ', '  #  ', '  #  ', '  #  '],
-    },
+    logo: COMMAND_LOGOS.DISPARAR,
   },
   {
     type: 'COLOCAR_MINA',
     desc: 'Deja mina en casilla (daño 40).',
-    logo: {
-      color: '#facc15',
-      grid: ['  #  ', ' ### ', '#####', ' ### ', '  #  '],
-    },
+    logo: COMMAND_LOGOS.COLOCAR_MINA,
   },
   {
     type: 'BOMBA',
     desc: 'Radial 3x3 a distancia.',
-    logo: {
-      color: '#ef4444',
-      grid: ['#   #', ' # # ', '  #  ', ' ### ', '#####', ' ### ', '  #  '],
-    },
+    logo: COMMAND_LOGOS.BOMBA,
   },
   {
     type: 'RAD',
     desc: 'Radar (- tanque, + estación).',
-    logo: {
-      color: '#4ade80',
-      grid: ['  #  ', ' # # ', '#   #', '  #  ', '  #  ', '  #  ', ' ### '],
-    },
+    logo: COMMAND_LOGOS.RAD,
   },
   {
     type: 'IF',
     desc: 'Si falla, salta línea.',
-    logo: {
-      color: '#a78bfa',
-      grid: [' ### ', '#   #', '   # ', '  #  ', '     ', '  #  ', '  #  '],
-    },
+    logo: COMMAND_LOGOS.IF,
   },
   {
     type: 'ESPERA',
     desc: 'Sin acción.',
-    logo: {
-      color: '#94a3b8',
-      grid: ['#####', ' # # ', '  #  ', ' # # ', '#####'],
-    },
+    logo: COMMAND_LOGOS.ESPERA,
   },
 ]
 

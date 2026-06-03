@@ -1,5 +1,5 @@
 import { commandToText, getDisplayScore } from '../../game'
-import { PixelIcon } from '../PixelIcon'
+import { GameIcon } from '../GameIcon'
 import { COMMAND_LOGOS, SCORE_STAT_ICONS } from './_const'
 import { getActiveLine } from './helpers'
 import type { SidebarProps } from './types'
@@ -56,7 +56,7 @@ export function Sidebar({ gameState, animatePassiveLines, animatedLineByTankId }
                   <strong>{tank.name}</strong>
                   {isActingTank && actionLogo && (
                     <span className="score-action-logo" title={formatExecutionText(tank.lastAction)}>
-                      <PixelIcon color={actionLogo.color} grid={actionLogo.grid} />
+                      <GameIcon color={actionLogo.color} icon={actionLogo.icon} />
                     </span>
                   )}
                 </header>
@@ -64,31 +64,31 @@ export function Sidebar({ gameState, animatePassiveLines, animatedLineByTankId }
                   <section className="tank-tags-panel">
                     <div className="tank-stats">
                       <span className="stat-chip">
-                        <PixelIcon color={SCORE_STAT_ICONS.health.color} grid={SCORE_STAT_ICONS.health.grid} /> <span>{Math.max(0, Math.round(tank.health))}</span>
+                        <GameIcon color={SCORE_STAT_ICONS.health.color} icon={SCORE_STAT_ICONS.health.icon} /> <span>{Math.max(0, Math.round(tank.health))}</span>
                       </span>
                       <span className="stat-chip">
-                        <PixelIcon color={SCORE_STAT_ICONS.kills.color} grid={SCORE_STAT_ICONS.kills.grid} /> <span>{tank.kills}</span>
+                        <GameIcon color={SCORE_STAT_ICONS.kills.color} icon={SCORE_STAT_ICONS.kills.icon} /> <span>{tank.kills}</span>
                       </span>
                       <span className="stat-chip">
-                        <PixelIcon color={SCORE_STAT_ICONS.bombs.color} grid={SCORE_STAT_ICONS.bombs.grid} /> <span>{tank.bombsLeft}</span>
+                        <GameIcon color={SCORE_STAT_ICONS.bombs.color} icon={SCORE_STAT_ICONS.bombs.icon} /> <span>{tank.bombsLeft}</span>
                       </span>
                       <span className="stat-chip">
-                        <PixelIcon color={SCORE_STAT_ICONS.mines.color} grid={SCORE_STAT_ICONS.mines.grid} /> <span>{tank.minesLeft}</span>
+                        <GameIcon color={SCORE_STAT_ICONS.mines.color} icon={SCORE_STAT_ICONS.mines.icon} /> <span>{tank.minesLeft}</span>
                       </span>
                       <span className="stat-chip">
-                        <PixelIcon color={SCORE_STAT_ICONS.rad.color} grid={SCORE_STAT_ICONS.rad.grid} /> <span>{formatTagValue(tank.registers.RAD)}</span>
+                        <GameIcon color={SCORE_STAT_ICONS.rad.color} icon={SCORE_STAT_ICONS.rad.icon} /> <span>{formatTagValue(tank.registers.RAD)}</span>
                       </span>
                       <span className="stat-chip">
-                        <PixelIcon color={SCORE_STAT_ICONS.radDir.color} grid={SCORE_STAT_ICONS.radDir.grid} /> <span>{formatTagValue(tank.registers.RAD_DIR)}</span>
+                        <GameIcon color={SCORE_STAT_ICONS.radDir.color} icon={SCORE_STAT_ICONS.radDir.icon} /> <span>{formatTagValue(tank.registers.RAD_DIR)}</span>
                       </span>
                       <span className="stat-chip">
-                        <PixelIcon color={SCORE_STAT_ICONS.danoDir.color} grid={SCORE_STAT_ICONS.danoDir.grid} /> <span>{formatTagValue(tank.registers.DANO_DIR)}</span>
+                        <GameIcon color={SCORE_STAT_ICONS.danoDir.color} icon={SCORE_STAT_ICONS.danoDir.icon} /> <span>{formatTagValue(tank.registers.DANO_DIR)}</span>
                       </span>
                       <span className="stat-chip">
-                        <PixelIcon color={SCORE_STAT_ICONS.dirMov.color} grid={SCORE_STAT_ICONS.dirMov.grid} /> <span>{formatTagValue(tank.registers.DIR_MOV)}</span>
+                        <GameIcon color={SCORE_STAT_ICONS.dirMov.color} icon={SCORE_STAT_ICONS.dirMov.icon} /> <span>{formatTagValue(tank.registers.DIR_MOV)}</span>
                       </span>
                       <span className="stat-chip">
-                        <PixelIcon color={SCORE_STAT_ICONS.score.color} grid={SCORE_STAT_ICONS.score.grid} /> <span>{getDisplayScore(tank)}</span>
+                        <GameIcon color={SCORE_STAT_ICONS.score.color} icon={SCORE_STAT_ICONS.score.icon} /> <span>{getDisplayScore(tank)}</span>
                       </span>
                     </div>
                   </section>

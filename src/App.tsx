@@ -22,7 +22,7 @@ import { MenuScreen } from './app/screens/MenuScreen'
 import { ProgramEditorScreen } from './app/screens/ProgramEditorScreen'
 import { TutorialScreen } from './app/screens/TutorialScreen'
 import { GameScreen } from './components/GameScreen'
-import { PixelIcon } from './components/PixelIcon'
+import { GameIcon } from './components/GameIcon'
 import {
   advanceGame,
   createCommandTemplate,
@@ -803,11 +803,11 @@ function App() {
             <p>{menuConfirmDialog.message}</p>
             <div className="confirm-actions">
               <button className="pixel-btn secondary btn-with-icon" onClick={cancelReturnToMenu}>
-                <span className="btn-icon"><PixelIcon color="#1f2937" grid={NAV_ICONS.cancel} /></span>
+                <span className="btn-icon"><GameIcon color="#1f2937" icon={NAV_ICONS.cancel} /></span>
                 <span>Cancelar</span>
               </button>
               <button className="pixel-btn danger btn-with-icon" onClick={confirmReturnToMenu}>
-                <span className="btn-icon"><PixelIcon color="#ffffff" grid={NAV_ICONS.menu} /></span>
+                <span className="btn-icon"><GameIcon color="#ffffff" icon={NAV_ICONS.menu} /></span>
                 <span>{menuConfirmDialog.confirmLabel}</span>
               </button>
             </div>
@@ -822,11 +822,11 @@ function App() {
             <p>Se reiniciará la partida actual desde cero. ¿Deseas continuar?</p>
             <div className="confirm-actions">
               <button className="pixel-btn secondary btn-with-icon" onClick={cancelRestartSimulation}>
-                <span className="btn-icon"><PixelIcon color="#1f2937" grid={NAV_ICONS.cancel} /></span>
+                <span className="btn-icon"><GameIcon color="#1f2937" icon={NAV_ICONS.cancel} /></span>
                 <span>Cancelar</span>
               </button>
               <button className="pixel-btn danger btn-with-icon" onClick={confirmRestartSimulation}>
-                <span className="btn-icon"><PixelIcon color="#ffffff" grid={NAV_ICONS.restart} /></span>
+                <span className="btn-icon"><GameIcon color="#ffffff" icon={NAV_ICONS.restart} /></span>
                 <span>Reiniciar</span>
               </button>
             </div>
@@ -841,11 +841,11 @@ function App() {
             <p>Se borrará solo el programa del tanque T{selectedTank + 1}. ¿Deseas continuar?</p>
             <div className="confirm-actions">
               <button className="pixel-btn secondary btn-with-icon" onClick={cancelClearSelectedProgram}>
-                <span className="btn-icon"><PixelIcon color="#1f2937" grid={NAV_ICONS.cancel} /></span>
+                <span className="btn-icon"><GameIcon color="#1f2937" icon={NAV_ICONS.cancel} /></span>
                 <span>Cancelar</span>
               </button>
               <button className="pixel-btn danger btn-with-icon" onClick={confirmClearSelectedProgram}>
-                <span className="btn-icon"><PixelIcon color="#ffffff" grid={NAV_ICONS.cancel} /></span>
+                <span className="btn-icon"><GameIcon color="#ffffff" icon={NAV_ICONS.cancel} /></span>
                 <span>Limpiar</span>
               </button>
             </div>

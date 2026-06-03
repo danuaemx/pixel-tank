@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { PixelIcon } from '../../components/PixelIcon'
+import { GameIcon } from '../../components/GameIcon'
 import { PixelRange } from '../../components/PixelRange'
 import {
   DEFAULT_MASTER_VOLUME,
@@ -209,15 +209,15 @@ export function ConfigScreen({
           Usar valores default
         </button>
         <button className="pixel-btn btn-with-icon" onClick={onOpenProgram}>
-          <span className="btn-icon"><PixelIcon color="#064e3b" grid={NAV_ICONS.program} /></span>
+          <span className="btn-icon"><GameIcon color="#064e3b" icon={NAV_ICONS.program} /></span>
           <span>Programar tanques</span>
         </button>
         <button className="pixel-btn btn-with-icon" onClick={onStartSimulation}>
-          <span className="btn-icon"><PixelIcon color="#064e3b" grid={NAV_ICONS.start} /></span>
+          <span className="btn-icon"><GameIcon color="#064e3b" icon={NAV_ICONS.start} /></span>
           <span>Iniciar simulación</span>
         </button>
         <button className="pixel-btn btn-with-icon" onClick={onBack}>
-          <span className="btn-icon"><PixelIcon color="#064e3b" grid={NAV_ICONS.menu} /></span>
+          <span className="btn-icon"><GameIcon color="#064e3b" icon={NAV_ICONS.menu} /></span>
           <span>Volver</span>
         </button>
       </div>
