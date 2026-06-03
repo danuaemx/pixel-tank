@@ -131,6 +131,7 @@ export interface GameConfig {
   wallDensity: number
   stationCount: number
   tickMs: number
+  shotRange: number
 }
 
 export interface GameState {

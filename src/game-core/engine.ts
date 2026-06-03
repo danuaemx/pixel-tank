@@ -228,7 +228,7 @@ function performShoot(state: GameState, tankIndex: number, dir: Direction): void
   }
 
   const vector = DIR_VECTORS[dir]
-  const range = Math.max(3, Math.floor(state.config.gridSize * 0.75))
+  const range = state.config.shotRange ?? 3
   pushSound(state, 'shoot')
 
   for (let distance = 1; distance <= range; distance += 1) {
@@ -239,7 +239,7 @@ function performShoot(state: GameState, tankIndex: number, dir: Direction): void
       break
     }
 
-    addEffect(state, 'shot', x, y, 1)
+    addEffect(state, 'shot', x, y, 2)
 
     if (state.walls.has(cellKey(x, y))) {
       break

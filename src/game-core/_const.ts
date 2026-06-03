@@ -12,6 +12,8 @@ export const MIN_BOMBS_PER_TANK = 0
 export const MAX_BOMBS_PER_TANK = 10
 export const MIN_MINES_PER_TANK = 0
 export const MAX_MINES_PER_TANK = 10
+export const MIN_SHOT_RANGE = 1
+export const MAX_SHOT_RANGE = 15
 
 export const DIRECTIONS: Direction[] = ['N', 'S', 'E', 'O']
 

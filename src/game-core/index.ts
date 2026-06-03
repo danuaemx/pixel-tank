@@ -16,6 +16,8 @@ export {
   MIN_PASSIVE_LIMIT,
   MIN_PLAYERS,
   TANK_COLORS,
+  MIN_SHOT_RANGE,
+  MAX_SHOT_RANGE,
 } from './_const'
 export { advanceGame } from './engine'
 export { commandToText, getDisplayScore, isActionCommand } from './format'

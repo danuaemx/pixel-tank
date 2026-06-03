@@ -12,6 +12,8 @@ import {
   MIN_PASSIVE_LIMIT,
   MIN_PLAYERS,
   TANK_COLORS,
+  MIN_SHOT_RANGE,
+  MAX_SHOT_RANGE,
 } from './_const'
 import { cellKey, clamp, createId, pickRandomFreeCell } from './utils'
 import type { Command, CommandType, GameConfig, GameState, Station, Tank } from './types'
@@ -52,6 +54,7 @@ export function createDefaultConfig(): GameConfig {
     wallDensity: 0.09,
     stationCount: 2,
     tickMs: 700,
+    shotRange: 3,
   }
 }
 
@@ -214,6 +217,7 @@ export function createInitialGameState(config: GameConfig, programs: Command[][]
     maxRounds: clamp(config.maxRounds, MIN_MAX_ROUNDS, MAX_MAX_ROUNDS),
     bombsPerTank: clamp(config.bombsPerTank, MIN_BOMBS_PER_TANK, MAX_BOMBS_PER_TANK),
     minesPerTank: clamp(config.minesPerTank, MIN_MINES_PER_TANK, MAX_MINES_PER_TANK),
+    shotRange: clamp(config.shotRange ?? 3, MIN_SHOT_RANGE, MAX_SHOT_RANGE),
   }
 
   const readyPrograms = normalizeProgramsForPlayers(programs, safeConfig.players)

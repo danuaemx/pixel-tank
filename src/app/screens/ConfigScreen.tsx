@@ -22,6 +22,8 @@ import {
   MIN_MAX_ROUNDS,
   MIN_MINES_PER_TANK,
   MIN_PLAYERS,
+  MIN_SHOT_RANGE,
+  MAX_SHOT_RANGE,
 } from '../../game'
 import type { GameConfig } from '../../game'
 
@@ -41,6 +43,7 @@ type ConfigScreenProps = {
   updateMaxRounds: (value: number) => void
   updateBombsPerTank: (value: number) => void
   updateMinesPerTank: (value: number) => void
+  updateShotRange: (value: number) => void
   updateUiFontSize: (value: number) => void
   updateMasterVolume: (value: number) => void
   applyDefaultSetup: () => void
@@ -59,6 +62,7 @@ export function ConfigScreen({
   updateMaxRounds,
   updateBombsPerTank,
   updateMinesPerTank,
+  updateShotRange,
   updateUiFontSize,
   updateMasterVolume,
   applyDefaultSetup,
@@ -136,6 +140,17 @@ export function ConfigScreen({
               MAX_MINES_PER_TANK,
               updateMinesPerTank,
               'minas por jugador',
+            )}
+          </label>
+
+          <label className="config-compact-setting">
+            Alcance de disparo ({MIN_SHOT_RANGE}-{MAX_SHOT_RANGE})
+            {renderConfigStepper(
+              config.shotRange ?? 3,
+              MIN_SHOT_RANGE,
+              MAX_SHOT_RANGE,
+              updateShotRange,
+              'alcance de disparo',
             )}
           </label>
         </div>
