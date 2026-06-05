@@ -8,7 +8,7 @@ type ParsedProgramFile = {
 }
 
 function normalizeProgramLine(line: string): string {
-  return line.trim()
+  return line.replace(/\s+/g, '')
 }
 
 function parseDirectionToken(value: string): 'N' | 'S' | 'E' | 'O' | 'RAD_DIR' {
@@ -25,22 +25,22 @@ function parseDirectionToken(value: string): 'N' | 'S' | 'E' | 'O' | 'RAD_DIR' {
 }
 
 function parseCondition(text: string): Condition {
-  const normalized = text.trim().toUpperCase()
+  const normalized = text.toUpperCase()
 
   if (normalized === 'TRUE') {
     return { kind: 'TRUE' }
   }
 
-  if (normalized === 'DAÑO_DIR != NONE') {
+  if (normalized === 'DAÑO_DIR!=NONE') {
     return { kind: 'DAÑO' }
   }
 
-  if (normalized.startsWith('DIR_MOV == ') || normalized.startsWith('DIR_MOV = ')) {
-    const prefix = normalized.startsWith('DIR_MOV == ') ? 'DIR_MOV == ' : 'DIR_MOV = '
+  if (normalized.startsWith('DIR_MOV==') || normalized.startsWith('DIR_MOV=')) {
+    const prefix = normalized.startsWith('DIR_MOV==') ? 'DIR_MOV==' : 'DIR_MOV='
     return { kind: 'DIR_MOV_EQ', dir: parseDirectionToken(normalized.slice(prefix.length)) as 'N' | 'S' | 'E' | 'O' }
   }
 
-  const match = normalized.match(/^(RADAR\((N|S|E|O)\)|RAD|SALUD)\s*(<=|<|>|>=|==|=)\s*(-?\d+)$/)
+  const match = normalized.match(/^(RADAR\((N|S|E|O)\)|RAD|SALUD)(<=|<|>|>=|==|=)(-?\d+)$/)
   if (match) {
     const regToken = match[1]
     let register: NumericRegister = 'RAD'
@@ -105,7 +105,7 @@ function parseCommandLine(line: string): Command {
     return command
   }
 
-  const bombMatch = normalized.match(/^BOMBA\((N|S|E|O|RAD_DIR),\s*(.+)\)$/i)
+  const bombMatch = normalized.match(/^BOMBA\((N|S|E|O|RAD_DIR),(.+)\)$/i)
   if (bombMatch) {
     const command = createCommandTemplate('BOMBA')
     const directionToken = bombMatch[1].toUpperCase()
@@ -117,7 +117,7 @@ function parseCommandLine(line: string): Command {
       command.dirSource = 'VAL'
     }
 
-    const distanceToken = bombMatch[2].trim().toUpperCase()
+    const distanceToken = bombMatch[2].toUpperCase()
     if (distanceToken === '|RAD|') {
       command.distSource = 'RAD'
     } else if (distanceToken === 'SALUD') {
@@ -135,12 +135,12 @@ function parseCommandLine(line: string): Command {
     return command
   }
 
-  const inlineIfMatch = normalized.match(/^IF\((.+)\)\s*:\s*(.+)$/i)
+  const inlineIfMatch = normalized.match(/^IF\((.+)\):(.+)$/i)
   if (inlineIfMatch) {
     const command = createCommandTemplate('IF')
     command.condition = parseCondition(inlineIfMatch[1])
 
-    const actionText = inlineIfMatch[2].trim()
+    const actionText = inlineIfMatch[2]
     const parsedAction = parseCommandLine(actionText)
 
     command.action = {
@@ -173,10 +173,10 @@ export function serializeProgramsToText(programs: Command[][], players: number):
     return lines.join('\n').trimEnd() + '\n'
   }
 
-  const lines: string[] = [`JUGADORES ${players}`]
+  const lines: string[] = [`JUGADORES${players}`]
 
   programs.forEach((program, index) => {
-    lines.push(`TANQUE ${index + 1}`)
+    lines.push(`TANQUE${index + 1}`)
     program.forEach((command) => {
       lines.push(commandToText(command))
     })
@@ -194,19 +194,21 @@ export function parseProgramsFromText(text: string, fallbackPlayers: number): Pa
 
   for (let rawLineIndex = 0; rawLineIndex < lines.length; rawLineIndex += 1) {
     const rawLine = lines[rawLineIndex]
-    const line = rawLine.trim()
+    const trimmed = rawLine.trim()
 
-    if (line.length === 0 || line.startsWith('#')) {
+    if (trimmed.length === 0 || trimmed.startsWith('#')) {
       continue
     }
 
-    const playersMatch = line.match(/^JUGADORES\s+(\d+)$/i)
+    const line = trimmed.replace(/\s+/g, '')
+
+    const playersMatch = line.match(/^JUGADORES(\d+)$/i)
     if (playersMatch) {
       players = Number(playersMatch[1])
       continue
     }
 
-    const tankMatch = line.match(/^TANQUE\s+(\d+)$/i)
+    const tankMatch = line.match(/^TANQUE(\d+)$/i)
     if (tankMatch) {
       const tankIndex = Number(tankMatch[1]) - 1
       currentProgram = []

@@ -33,7 +33,7 @@ export function commandToText(command: Command): string {
   if (command.type === 'IF') {
     const condText = conditionToText(command.condition)
     if (command.action) {
-      return `IF(${condText}): ${commandToText({ ...command.action, id: '' })}`
+      return `IF(${condText}):${commandToText({ ...command.action, id: '' })}`
     }
     return `IF(${condText})`
   }

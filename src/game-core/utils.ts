@@ -187,17 +187,17 @@ export function conditionToText(condition: Condition | undefined): string {
     const operator = safeCondition.operator ?? '='
     const value = safeCondition.value ?? 0
     if (register === 'RAD' && safeCondition.dir) {
-      return `RADAR(${safeCondition.dir}) ${operator} ${value}`
+      return `RADAR(${safeCondition.dir})${operator}${value}`
     }
-    return `${register} ${operator} ${value}`
+    return `${register}${operator}${value}`
   }
 
   if (safeCondition.kind === 'DIR_MOV_EQ') {
-    return `DIR_MOV = ${safeCondition.dir ?? 'N'}`
+    return `DIR_MOV=${safeCondition.dir ?? 'N'}`
   }
 
   if (safeCondition.kind === 'DAÑO') {
-    return 'DAÑO_DIR != NONE'
+    return 'DAÑO_DIR!=NONE'
   }
 
   return 'TRUE'
