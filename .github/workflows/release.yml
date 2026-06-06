@@ -2,8 +2,8 @@ name: "Publish Release"
 
 on:
   push:
-    tags:
-      - 'v*' # Se activa cuando haces push a una etiqueta como v0.1.0, v1.0.0, etc.
+    branches:
+      - ejecutable # Se activa automáticamente cada vez que haces push a la rama 'ejecutable'
 
 jobs:
   publish-tauri:
