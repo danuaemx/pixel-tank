@@ -13,7 +13,11 @@ export function CreditsScreen({ onBackToMenu }: CreditsScreenProps) {
 
       <h3>Autores</h3>
       <ul className="tutorial-list">
-        <li><span className="tutorial-item-icon"><GameIcon color="#fcd34d" icon={NAV_ICONS.credits} /></span><strong>[Por definir]</strong></li>
+        <li><span className="tutorial-item-icon"><GameIcon color="#fcd34d" icon={NAV_ICONS.credits} /></span><strong>Daniel Eduardo Ruiz Camacho</strong></li>
+        <li><span className="tutorial-item-icon"><GameIcon color="#4ade80" icon={NAV_ICONS.config} /></span><strong>Angel Daniel Barrera Torres</strong></li>
+        <li><span className="tutorial-item-icon"><GameIcon color="#4ade80" icon={NAV_ICONS.config} /></span><strong>Jesus Estrada Millan</strong></li>
+        <li><span className="tutorial-item-icon"><GameIcon color="#4ade80" icon={NAV_ICONS.config} /></span><strong>Jesus Linares Prado</strong></li>
+
       </ul>
 
       <h3>Recursos usados</h3>
@@ -25,6 +29,7 @@ export function CreditsScreen({ onBackToMenu }: CreditsScreenProps) {
         <li><span className="tutorial-item-icon"><GameIcon color="#22d3ee" icon={NAV_ICONS.quick} /></span><strong>public/thank1.png</strong>: imagen de fondo del juego.</li>
         <li><span className="tutorial-item-icon"><GameIcon color="#facc15" icon={NAV_ICONS.save} /></span><strong>src/audio.ts</strong>: música y sonidos chiptune de la UI y el juego.</li>
         <li><span className="tutorial-item-icon"><GameIcon color="#60a5fa" icon={NAV_ICONS.load} /></span><strong>src/components/GameIcon.tsx</strong>: conversión y renderizado estandarizado de iconos de la UI.</li>
+        <li><span className="tutorial-item-icon"><GameIcon color="#60a5fa" icon={NAV_ICONS.load} /></span><strong>Tauri</strong>: entorno de escritorio para empaquetar la aplicación.</li>
       </ul>
 
       <h3>Música</h3>
