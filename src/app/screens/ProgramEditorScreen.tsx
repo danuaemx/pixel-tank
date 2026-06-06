@@ -28,6 +28,8 @@ import { PixelSelect } from '../components/PixelSelect'
 import { createDefaultCondition, getConditionForEditor } from '../utils'
 import type { DragPayload } from '../types'
 
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+
 type ProgramEditorScreenProps = {
   config: GameConfig
   selectedTank: number
@@ -47,7 +49,7 @@ type ProgramEditorScreenProps = {
   getIfDependencyDepth: (program: Command[], index: number) => number
   renderProgramField: (label: string, control: React.ReactNode, className?: string) => React.ReactNode
   onExportPrograms: () => void
-  onImportPrograms: (text: string) => void
+  onImportPrograms: (text?: string) => void
   onClearProgram: () => void
   onBackToConfig: () => void
   onStartSimulation: () => void
@@ -180,7 +182,7 @@ export function ProgramEditorScreen({
               </span>
               Guardar
             </button>
-            <button className="small-btn btn-with-icon" type="button" title="Cargar tanque desde TXT" aria-label="Cargar tanque desde TXT" onClick={triggerImport}>
+            <button className="small-btn btn-with-icon" type="button" title="Cargar tanque desde TXT" aria-label="Cargar tanque desde TXT" onClick={isTauri ? () => onImportPrograms() : triggerImport}>
               <span className="btn-icon">
                 <GameIcon color="#1f2937" icon={NAV_ICONS.load} />
               </span>

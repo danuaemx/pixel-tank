@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { save, open } from '@tauri-apps/plugin-dialog'
+import { writeTextFile, readTextFile } from '@tauri-apps/plugin-fs'
 import './App.css'
 import { chiptuneAudio } from './audio'
 import type { MusicTheme } from './audio'
@@ -48,6 +50,8 @@ import {
   type GameConfig,
   type GameState,
 } from './game'
+
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
 function App() {
   const GAME_THEMES: MusicTheme[] = ['game', 'quick', 'victory']
@@ -409,21 +413,59 @@ function App() {
     startScreenMusic(gameMusicTheme)
   }
 
-  const exportProgramsToText = (): void => {
+  const exportProgramsToText = async (): Promise<void> => {
     const selectedProgram = programs[selectedTank] ?? []
     const text = serializeProgramsToText([selectedProgram], 1)
-    const fileBlob = new Blob([text], { type: 'text/plain;charset=utf-8' })
-    const downloadUrl = window.URL.createObjectURL(fileBlob)
-    const link = document.createElement('a')
-    link.href = downloadUrl
-    link.download = `tanque-${selectedTank + 1}.txt`
-    link.click()
-    window.URL.revokeObjectURL(downloadUrl)
+
+    if (isTauri) {
+      try {
+        const filePath = await save({
+          filters: [{
+            name: 'Text',
+            extensions: ['txt'],
+          }],
+          defaultPath: `tanque-${selectedTank + 1}.txt`,
+        })
+        if (filePath) {
+          await writeTextFile(filePath, text)
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'No se pudo guardar el archivo.'
+        window.alert(message)
+      }
+    } else {
+      const fileBlob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+      const downloadUrl = window.URL.createObjectURL(fileBlob)
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = `tanque-${selectedTank + 1}.txt`
+      link.click()
+      window.URL.revokeObjectURL(downloadUrl)
+    }
   }
 
-  const importProgramsFromText = (text: string): void => {
+  const importProgramsFromText = async (text?: string): Promise<void> => {
     try {
-      const parsed = parseProgramsFromText(text, 1)
+      let finalContent = text
+      if (isTauri && !finalContent) {
+        const filePath = await open({
+          multiple: false,
+          filters: [{
+            name: 'Text',
+            extensions: ['txt'],
+          }],
+        })
+        if (!filePath) {
+          return
+        }
+        finalContent = await readTextFile(filePath)
+      }
+
+      if (!finalContent) {
+        return
+      }
+
+      const parsed = parseProgramsFromText(finalContent, 1)
       const activePrograms = parsed.programs.filter((p) => p !== undefined)
 
       if (activePrograms.length === 0) {
