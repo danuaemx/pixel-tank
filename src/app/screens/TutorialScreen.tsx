@@ -1,7 +1,7 @@
 import { NAV_ICONS } from '../_const'
 import { GameIcon } from '../../components/GameIcon'
 import { COMMAND_LOGOS, SCORE_STAT_ICONS, SUMMARY_ICONS } from '../../components/game-screen/_const'
-import { IconUsers, IconGrid3x3 } from '@tabler/icons-react'
+import { IconUsers, IconGrid3x3, IconPlayerPlay, IconPlayerSkipForward } from '@tabler/icons-react'
 
 type TutorialScreenProps = {
   onBackToMenu: () => void
@@ -68,6 +68,38 @@ export function TutorialScreen({ onBackToMenu }: TutorialScreenProps) {
         <li><span className="tutorial-item-icon"><GameIcon color="#22d3ee" icon={SUMMARY_ICONS.stations} /></span>Recupera 10 al pisar estación; estaciones se mueven cada 5 rondas.</li>
         <li><span className="tutorial-item-icon"><GameIcon color="#f97316" icon={SUMMARY_ICONS.mines} /></span>Eliminar objetivos da recuperación del 20% y puntos.</li>
         <li><span className="tutorial-item-icon"><GameIcon color="#fcd34d" icon={SUMMARY_ICONS.leader} /></span>Puntaje: eliminaciones, salud final y 10% extra al código más corto.</li>
+      </ul>
+
+      <h3>Archivos de Tanque</h3>
+      <ul className="tutorial-list">
+        <li>
+          <span className="tutorial-item-icon">
+            <GameIcon color="#10b981" icon={NAV_ICONS.save} />
+          </span>
+          <strong>Exportar (Guardar)</strong>: guarda las instrucciones del tanque seleccionado en un archivo local `.txt`.
+        </li>
+        <li>
+          <span className="tutorial-item-icon">
+            <GameIcon color="#3b82f6" icon={NAV_ICONS.load} />
+          </span>
+          <strong>Importar (Cargar)</strong>: carga un archivo de texto `.txt` con comandos para el tanque activo.
+        </li>
+      </ul>
+
+      <h3>Modos de Simulación</h3>
+      <ul className="tutorial-list">
+        <li>
+          <span className="tutorial-item-icon">
+            <GameIcon color="#f59e0b" icon={IconPlayerPlay} />
+          </span>
+          <strong>Modo Automático</strong>: la simulación corre continuamente hasta definir el ganador.
+        </li>
+        <li>
+          <span className="tutorial-item-icon">
+            <GameIcon color="#a855f7" icon={IconPlayerSkipForward} />
+          </span>
+          <strong>Paso a Paso</strong>: permite pausar y avanzar un turno a la vez para analizar y depurar el comportamiento.
+        </li>
       </ul>
 
       <div className="inline-actions">
