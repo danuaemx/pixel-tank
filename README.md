@@ -17,7 +17,7 @@ Cada tanque ejecuta un programa propio por turnos. El objetivo es sobrevivir, de
 npm install
 ```
 
-### Modo desarrollo
+### Modo desarrollo (Web)
 
 ```bash
 npm run dev
@@ -25,7 +25,39 @@ npm run dev
 
 Arranca Vite con recarga en caliente para desarrollar la interfaz y probar cambios de forma inmediata.
 
-### Producción local
+### Modo desarrollo (Escritorio - Tauri)
+
+```bash
+npm run tauri dev
+```
+
+---
+
+## Compilación para Escritorio (Tauri v2)
+
+Puedes compilar la aplicación para usarla de forma nativa en tu sistema operativo sin depender del navegador.
+
+### Requisitos previos (Solo Linux/Ubuntu/Kubuntu)
+Para poder compilar y ejecutar el motor Webview y los códecs de audio del juego en Linux, instala primero las dependencias del sistema:
+
+```bash
+sudo apt update
+sudo apt install -y build-essential curl wget file libssl-dev libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav
+```
+
+### Comando de compilación
+Una vez cumplidos los requisitos, ejecuta:
+
+```bash
+npm run tauri build
+```
+
+*   **En Windows**: Generará un instalador `.msi` y un ejecutable `.exe` independiente en la carpeta `src-tauri/target/release/bundle/msi/`.
+*   **En Linux**: Generará un ejecutable portable `.AppImage` y un instalador `.deb` en la carpeta `src-tauri/target/release/bundle/appimage/` y `src-tauri/target/release/bundle/deb/` respectivamente.
+
+---
+
+### Producción local (Web)
 
 ```bash
 npm run build
